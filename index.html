@@ -448,7 +448,7 @@
     // === WEB-LLM MULTIMODAL ENGINE INITIALIZATION ===
     async function initAI() {
         try {
-            engine = await CreateMLCEngine("paligemma-3b-pt-448-q4f16_1-MLC", {
+            engine = await CreateMLCEngine("gemma-2-2b-it-q4f16_1-MLC", {
                 initProgressCallback: (p) => {
                     statusDiv.textContent = p.text;
                 },
