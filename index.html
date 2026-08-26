@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RAINBOW AI</title>
+    <style>
+      :root {
+        --bg-dark: #121214;
+        --sidebar-bg: #1a1a1e;
+        --chat-bg: #121214;
+        --text-main: #f5f5f7;
+        --text-muted: #86868b;
+        --border-color: #2c2c2e;
+        --accent-blue: #0071e3;
+        --input-bg: #1c1c1e;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      /* Sidebar Navigation Column */
+      .sidebar {
+        width: 260px;
+        background-color: var(--sidebar-bg);
+        border-right: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      .logo {
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 30px;
+        color: var(--text-main);
+      }
+
+      .new-chat-btn {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: left;
+        font-size: 14px;
+        margin-bottom: 25px;
+        transition: background 0.2s;
+      }
+
+      .new-chat-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .sidebar-section {
+        margin-bottom: 25px;
+      }
+
+      .sidebar-heading {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        letter-spacing: 1.5px;
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+
+      .sidebar-item {
+        font-size: 14px;
+        color: var(--text-muted);
+        padding: 8px 0;
+        cursor: default;
+      }
+
+      .upcoming-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .upcoming-list li {
+        font-size: 13px;
+        color: var(--text-muted);
+        padding: 6px 0;
+        display: flex;
+        align-items: center;
+      }
+
+      .upcoming-list li::before {
+        content: "•";
+        color: var(--accent-blue);
+        margin-right: 8px;
+        font-size: 16px;
+      }
+
+      /* Main AI Chat Interface Column */
+      .main-chat {
+        flex-grow: 1;
+        background-color: var(--chat-bg);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+      }
+
+      .chat-header {
+        padding: 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .chat-title {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        margin: 0;
+      }
+
+      #status {
+        font-size: 12px;
+        color: var(--accent-blue);
+      }
+
+      .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        box-sizing: border-box;
+      }
+
+      .message {
+        max-width: 75%;
+        line-height: 1.5;
+        font-size: 15px;
+        word-wrap: break-word;
+      }
+
+      .user-msg {
+        align-self: flex-end;
+        color: var(--text-main);
+        background: var(--input-bg);
+        padding: 12px 18px;
+        border-radius: 18px 18px 4px 18px;
+      }
+
+      .ai-msg {
+        align-self: flex-start;
+        color: var(--text-main);
+        padding: 0;
+      }
+
+      /* Input Deck Frame */
+      .input-container {
+        padding: 20px 30px 30px 30px;
+        background-color: var(--chat-bg);
+      }
+
+      .input-wrapper {
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        gap: 12px;
+      }
+
+      .attach-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 18px;
+        cursor: not-allowed;
+        padding: 0;
+      }
+
+      textarea {
+        flex-grow: 1;
+        background: transparent;
+        border: none;
+        color: var(--text-main);
+        font-family: inherit;
+        font-size: 15px;
+        resize: none;
+        height: 24px;
+        outline: none;
+        box-sizing: border-box;
+      }
+
+      textarea::placeholder {
+        color: var(--text-muted);
+      }
+
+      .send-btn {
+        background: none;
+        border: none;
+        color: var(--accent-blue);
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 0 5px;
+      }
+
+      .send-btn:disabled {
+        color: var(--text-muted);
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Left Hand Sidebar Component -->
+    <div class="sidebar">
+      <div class="logo">RAINBOW AI</div>
+      <button class="new-chat-btn" onclick="window.location.reload()">
+        + New Chat
+      </button>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Chat History</div>
+        <div class="sidebar-item">No recent conversations</div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Upcoming Features</div>
+        <ul class="upcoming-list">
+          <li>Code Execution Sandbox</li>
+          <li>Dark/Light Theme Toggle</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Main Live WebAssembly Working Workspace -->
+    <div class="main-chat">
+      <div class="chat-header">
+        <h3 class="chat-title">### RAINBOW</h3>
+        <div id="status">Loading Vision Engine...</div>
+      </div>
+
+      <div class="chat-messages" id="chatbox">
+        <!-- Dynamic local runtime blocks append here -->
+      </div>
+
+      <div class="input-container">
+        <div class="input-wrapper">
+          <button
+            class="attach-btn"
+            title="Vision upload disabled in WebAssembly mode"
+            disabled
+          >
+            📎
+          </button>
+          <textarea
+            id="userInput"
+            placeholder="Ask anything..."
+            disabled
+          ></textarea>
+          <button
+            class="send-btn"
+            id="sendBtn"
+            onclick="generateText()"
+            disabled
+          >
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { env, pipeline } from "https://jsdelivr.net";
+
+      env.allowLocalModels = false;
+
+      const statusDiv = document.getElementById("status");
+      const userInput = document.getElementById("userInput");
+      const sendBtn = document.getElementById("sendBtn");
+      const chatbox = document.getElementById("chatbox");
+      let generatorPipeline = null;
+
+      async function initAI() {
+        try {
+          // Deploying zero-fee 0.5B target model inside the browser framework safely
+          generatorPipeline = await pipeline(
+            "text-generation",
+            "Xenova/Qwen1.5-0.5B-Chat",
+          );
+
+          statusDiv.innerText = "● Engine Active";
+          statusDiv.style.color = "#34c759"; // Active green color
+          userInput.disabled = false;
+          sendBtn.disabled = false;
+          userInput.placeholder = "Message Rainbow...";
+        } catch (error) {
+          statusDiv.innerText = "Engine Error";
+          statusDiv.style.color = "#ff3b30";
+          console.error(error);
+        }
+      }
+
+      window.generateText = async function () {
+        const text = userInput.value.trim();
+        if (!text || !generatorPipeline) return;
+
+        // Render User Input
+        chatbox.innerHTML += `<div class="message user-msg">${text}</div>`;
+        userInput.value = "";
+        chatbox.scrollTop = chatbox.scrollHeight;
+
+        statusDiv.innerText = "Computing tokens...";
+        statusDiv.style.color = "#ff9500"; // Processing orange color
+        sendBtn.disabled = true;
+
+        try {
+          const output = await generatorPipeline(text, {
+            max_new_tokens: 70,
+            temperature: 0.6,
+            repetition_penalty: 1.2,
+          });
+
+          let reply = output.generated_text;
+
+          // Text scrub cleaner
+          if (reply.includes(text)) {
+            reply = reply.replace(text, "").trim();
+          }
+
+          chatbox.innerHTML += `<div class="message ai-msg"><strong>Rainbow:</strong><br>${reply || "Inference completed safely."}</div>`;
+        } catch (err) {
+          chatbox.innerHTML += `<div class="message ai-msg" style="color:#ff3b30;">Execution context failure.</div>`;
+        }
+
+        statusDiv.innerText = "● Engine Active";
+        statusDiv.style.color = "#34c759";
+        sendBtn.disabled = false;
+        chatbox.scrollTop = chatbox.scrollHeight;
+      };
+
+      // Automatically trigger on pressing regular text enter key without shifts
+      userInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          generateText();
+        }
+      });
+
+      initAI();
+    </script>
+  </body>
+</html>
