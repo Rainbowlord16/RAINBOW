@@ -1,366 +1,535 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RAINBOW AI</title>
     <style>
-      :root {
-        --bg-dark: #121214;
-        --sidebar-bg: #1a1a1e;
-        --chat-bg: #121214;
-        --text-main: #f5f5f7;
-        --text-muted: #86868b;
-        --border-color: #2c2c2e;
-        --accent-blue: #0071e3;
-        --input-bg: #1c1c1e;
-      }
-
-      body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background-color: var(--bg-dark);
-        color: var(--text-main);
-        margin: 0;
-        padding: 0;
-        display: flex;
-        height: 100vh;
-        overflow: hidden;
-      }
-
-      /* Sidebar Navigation Column */
-      .sidebar {
-        width: 260px;
-        background-color: var(--sidebar-bg);
-        border-right: 1px solid var(--border-color);
-        display: flex;
-        flex-direction: column;
-        padding: 20px;
-        box-sizing: border-box;
-      }
-
-      .logo {
-        font-size: 16px;
-        font-weight: 700;
-        letter-spacing: 1px;
-        margin-bottom: 30px;
-        color: var(--text-main);
-      }
-
-      .new-chat-btn {
-        background: transparent;
-        border: 1px solid var(--border-color);
-        color: var(--text-main);
-        padding: 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        text-align: left;
-        font-size: 14px;
-        margin-bottom: 25px;
-        transition: background 0.2s;
-      }
-
-      .new-chat-btn:hover {
-        background: rgba(255, 255, 255, 0.05);
-      }
-
-      .sidebar-section {
-        margin-bottom: 25px;
-      }
-
-      .sidebar-heading {
-        font-size: 11px;
-        text-transform: uppercase;
-        color: var(--text-muted);
-        letter-spacing: 1.5px;
-        margin-bottom: 10px;
-        font-weight: 600;
-      }
-
-      .sidebar-item {
-        font-size: 14px;
-        color: var(--text-muted);
-        padding: 8px 0;
-        cursor: default;
-      }
-
-      .upcoming-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-
-      .upcoming-list li {
-        font-size: 13px;
-        color: var(--text-muted);
-        padding: 6px 0;
-        display: flex;
-        align-items: center;
-      }
-
-      .upcoming-list li::before {
-        content: "•";
-        color: var(--accent-blue);
-        margin-right: 8px;
-        font-size: 16px;
-      }
-
-      /* Main AI Chat Interface Column */
-      .main-chat {
-        flex-grow: 1;
-        background-color: var(--chat-bg);
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        position: relative;
-      }
-
-      .chat-header {
-        padding: 20px;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .chat-title {
-        font-size: 15px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        margin: 0;
-      }
-
-      #status {
-        font-size: 12px;
-        color: var(--accent-blue);
-      }
-
-      .chat-messages {
-        flex-grow: 1;
-        overflow-y: auto;
-        padding: 30px;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        box-sizing: border-box;
-      }
-
-      .message {
-        max-width: 75%;
-        line-height: 1.5;
-        font-size: 15px;
-        word-wrap: break-word;
-      }
-
-      .user-msg {
-        align-self: flex-end;
-        color: var(--text-main);
-        background: var(--input-bg);
-        padding: 12px 18px;
-        border-radius: 18px 18px 4px 18px;
-      }
-
-      .ai-msg {
-        align-self: flex-start;
-        color: var(--text-main);
-        padding: 0;
-      }
-
-      /* Input Deck Frame */
-      .input-container {
-        padding: 20px 30px 30px 30px;
-        background-color: var(--chat-bg);
-      }
-
-      .input-wrapper {
-        background-color: var(--input-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        padding: 10px 15px;
-        gap: 12px;
-      }
-
-      .attach-btn {
-        background: none;
-        border: none;
-        color: var(--text-muted);
-        font-size: 18px;
-        cursor: not-allowed;
-        padding: 0;
-      }
-
-      textarea {
-        flex-grow: 1;
-        background: transparent;
-        border: none;
-        color: var(--text-main);
-        font-family: inherit;
-        font-size: 15px;
-        resize: none;
-        height: 24px;
-        outline: none;
-        box-sizing: border-box;
-      }
-
-      textarea::placeholder {
-        color: var(--text-muted);
-      }
-
-      .send-btn {
-        background: none;
-        border: none;
-        color: var(--accent-blue);
-        font-weight: 600;
-        font-size: 14px;
-        cursor: pointer;
-        padding: 0 5px;
-      }
-
-      .send-btn:disabled {
-        color: var(--text-muted);
-        cursor: not-allowed;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Left Hand Sidebar Component -->
-    <div class="sidebar">
-      <div class="logo">RAINBOW AI</div>
-      <button class="new-chat-btn" onclick="window.location.reload()">
-        + New Chat
-      </button>
-
-      <div class="sidebar-section">
-        <div class="sidebar-heading">Chat History</div>
-        <div class="sidebar-item">No recent conversations</div>
-      </div>
-
-      <div class="sidebar-section">
-        <div class="sidebar-heading">Upcoming Features</div>
-        <ul class="upcoming-list">
-          <li>Code Execution Sandbox</li>
-          <li>Dark/Light Theme Toggle</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Main Live WebAssembly Working Workspace -->
-    <div class="main-chat">
-      <div class="chat-header">
-        <h3 class="chat-title">### RAINBOW</h3>
-        <div id="status">Loading Vision Engine...</div>
-      </div>
-
-      <div class="chat-messages" id="chatbox">
-        <!-- Dynamic local runtime blocks append here -->
-      </div>
-
-      <div class="input-container">
-        <div class="input-wrapper">
-          <button
-            class="attach-btn"
-            title="Vision upload disabled in WebAssembly mode"
-            disabled
-          >
-            📎
-          </button>
-          <textarea
-            id="userInput"
-            placeholder="Ask anything..."
-            disabled
-          ></textarea>
-          <button
-            class="send-btn"
-            id="sendBtn"
-            onclick="generateText()"
-            disabled
-          >
-            Send
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <script type="module">
-      import { env, pipeline } from "https://jsdelivr.net";
-
-      env.allowLocalModels = false;
-
-      const statusDiv = document.getElementById("status");
-      const userInput = document.getElementById("userInput");
-      const sendBtn = document.getElementById("sendBtn");
-      const chatbox = document.getElementById("chatbox");
-      let generatorPipeline = null;
-
-      async function initAI() {
-        try {
-          // Deploying zero-fee 0.5B target model inside the browser framework safely
-          generatorPipeline = await pipeline(
-            "text-generation",
-            "Xenova/Qwen1.5-0.5B-Chat",
-          );
-
-          statusDiv.innerText = "● Engine Active";
-          statusDiv.style.color = "#34c759"; // Active green color
-          userInput.disabled = false;
-          sendBtn.disabled = false;
-          userInput.placeholder = "Message Rainbow...";
-        } catch (error) {
-          statusDiv.innerText = "Engine Error";
-          statusDiv.style.color = "#ff3b30";
-          console.error(error);
+        :root {
+            /* Dark Theme Variables (Default) */
+            --rainbow-grad: linear-gradient(135deg, #1e1b4b, #31103f, #0f172a, #02233b);
+            --sidebar-bg: rgba(15, 23, 42, 0.75);
+            --chat-container-bg: rgba(15, 23, 42, 0.55);
+            --text-main: #f8fafc;
+            --text-muted: rgba(248, 250, 252, 0.65);
+            --border-light: rgba(255, 255, 255, 0.12);
+            --input-panel-bg: rgba(30, 41, 59, 0.7);
+            --bubble-user: linear-gradient(135deg, #3b82f6, #a855f7);
+            --bubble-ai: rgba(30, 41, 59, 0.85);
+            --image-accent: #06b6d4;
         }
-      }
 
-      window.generateText = async function () {
+        [data-theme="light"] {
+            /* Light Theme Variables */
+            --rainbow-grad: linear-gradient(135deg, #f8fafc, #e2e8f0, #f1f5f9, #e0f2fe);
+            --sidebar-bg: rgba(255, 255, 255, 0.85);
+            --chat-container-bg: rgba(255, 255, 255, 0.65);
+            --text-main: #0f172a;
+            --text-muted: rgba(15, 23, 42, 0.6);
+            --border-light: rgba(0, 0, 0, 0.1);
+            --input-panel-bg: rgba(255, 255, 255, 0.9);
+            --bubble-user: linear-gradient(135deg, #3b82f6, #6366f1);
+            --bubble-ai: rgba(241, 245, 249, 0.9);
+            --image-accent: #0284c7;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+            color: var(--text-main);
+            background: var(--rainbow-grad);
+            background-size: 400% 400%;
+            animation: moveGradient 20s ease infinite;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        @keyframes moveGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Neural Network Interactive Layer Canvas */
+        #neuralCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.65;
+        }
+
+        .app-wrapper {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Translucent Glassmorphism Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .logo-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .theme-toggle-btn {
+            background: var(--border-light);
+            border: none;
+            color: var(--text-main);
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .theme-toggle-btn:active {
+            transform: scale(0.95);
+        }
+
+        .new-chat-btn {
+            background: var(--border-light);
+            border: 1px solid var(--border-light);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            transition: background 0.2s;
+        }
+        .new-chat-btn:hover {
+            background: rgba(168, 85, 247, 0.2);
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-heading {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-main);
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            font-weight: 700;
+            opacity: 0.9;
+        }
+
+        .sidebar-item {
+            font-size: 14px;
+            color: var(--text-muted);
+            padding: 6px 0;
+        }
+
+        /* Workspace Grid Window Frame */
+        .main-chat {
+            flex-grow: 1;
+            background: var(--chat-container-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: background 0.3s ease;
+        }
+
+        .chat-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        #status {
+            font-size: 13px;
+            font-weight: 600;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-sizing: border-box;
+        }
+
+        .message {
+            max-width: 75%;
+            line-height: 1.5;
+            font-size: 15px;
+            word-wrap: break-word;
+            padding: 14px 20px;
+            border-radius: 18px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            white-space: pre-wrap;
+        }
+
+        .user-msg {
+            align-self: flex-end;
+            background: var(--bubble-user);
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-msg {
+            align-self: flex-start;
+            background: var(--bubble-ai);
+            color: var(--text-main);
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border-light);
+        }
+
+        .input-container {
+            padding: 20px 30px 30px 30px;
+        }
+
+        .input-wrapper {
+            background: var(--input-panel-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            padding: 12px 18px;
+            gap: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .attach-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        textarea {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 15px;
+            resize: none;
+            height: 24px;
+            outline: none;
+        }
+
+        textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-btn {
+            background: var(--text-main);
+            border: none;
+            color: var(--sidebar-bg);
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .send-btn:disabled, .attach-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Neural Network Node Canvas Matrix Component -->
+    <canvas id="neuralCanvas"></canvas>
+
+    <div class="app-wrapper">
+        <!-- Sidebar Navigation Block -->
+        <div class="sidebar">
+            <div class="logo-row">
+                <div class="logo">RAINBOW AI 🌈</div>
+                <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Light/Dark Theme">☀️</button>
+            </div>
+            
+            <button class="new-chat-btn" onclick="window.location.reload()">+ New Chat</button>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-heading">Chat History</div>
+                <div class="sidebar-item">Local Vision Node Idle</div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-heading">Active Pipeline</div>
+                <div class="sidebar-item" style="font-size:12px; font-weight:600;">Web-LLM (PaliGemma)</div>
+            </div>
+        </div>
+
+        <!-- Main Workspace Interface Panel -->
+        <div class="main-chat">
+            <div class="chat-header">
+                <h3 class="chat-title">Multimodal Local Core</h3>
+                <div id="status">Initializing WebGPU Engine...</div>
+            </div>
+
+            <div class="chat-messages" id="chatbox"></div>
+
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;" />
+                    <button class="attach-btn" id="attachBtn" title="Upload Image" disabled>📎</button>
+                    <textarea id="userInput" placeholder="Loading engine weights..." disabled></textarea>
+                    <button class="send-btn" id="sendBtn" disabled>Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    function toggleTheme() {
+        const html = document.documentElement;
+        const btn = document.getElementById('themeToggleBtn');
+        if (html.getAttribute('data-theme') === 'dark') {
+            html.setAttribute('data-theme', 'light');
+            btn.textContent = '🌙';
+        } else {
+            html.setAttribute('data-theme', 'dark');
+            btn.textContent = '☀️';
+        }
+    }
+</script>
+
+<script type="module">
+    import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
+
+    const statusDiv = document.getElementById('status');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const attachBtn = document.getElementById('attachBtn');
+    const imageInput = document.getElementById('imageInput');
+    const chatbox = document.getElementById('chatbox');
+
+    let engine = null;
+    let currentMessages = [];
+    let selectedImageBase64 = null;
+
+    // === NEURAL NETWORK BACKGROUND CANVAS ANIMATION MOTOR ===
+    const canvas = document.getElementById('neuralCanvas');
+    const ctx = canvas.getContext('2d');
+    let particlesArray = [];
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 1;
+            this.speedX = Math.random() * 0.6 - 0.3;
+            this.speedY = Math.random() * 0.6 - 0.3;
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+            if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+        }
+        draw() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            ctx.fillStyle = isLight ? 'rgba(168, 85, 247, 0.7)' : 'rgba(255, 255, 255, 0.7)';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function initParticles() {
+        particlesArray = [];
+        const count = Math.min(80, (canvas.width * canvas.height) / 15000);
+        for (let i = 0; i < count; i++) {
+            particlesArray.push(new Particle());
+        }
+    }
+    initParticles();
+
+    function animateCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        const lineColor = isLight ? '168, 85, 247' : '255, 255, 255';
+
+        for (let i = 0; i < particlesArray.length; i++) {
+            particlesArray[i].update();
+            particlesArray[i].draw();
+            for (let j = i; j < particlesArray.length; j++) {
+                const dx = particlesArray[i].x - particlesArray[j].x;
+                const dy = particlesArray[i].y - particlesArray[j].y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 110) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = `rgba(${lineColor}, ${0.25 - distance/440})`;
+                    ctx.lineWidth = 0.8;
+                    ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
+                    ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
+                    ctx.stroke();
+                    ctx.closePath();
+                }
+            }
+        }
+        requestAnimationFrame(animateCanvas);
+    }
+    animateCanvas();
+
+    // === IMAGE ATTACHMENT HANDLING ===
+    attachBtn.addEventListener('click', () => imageInput.click());
+
+    imageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(uploadEvent) {
+            selectedImageBase64 = uploadEvent.target.result;
+            attachBtn.style.color = "var(--image-accent)";
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // === WEB-LLM MULTIMODAL ENGINE INITIALIZATION ===
+    async function initAI() {
+        try {
+            engine = await CreateMLCEngine("paligemma-3b-pt-448-q4f16_1-MLC", {
+                initProgressCallback: (p) => {
+                    statusDiv.textContent = p.text;
+                },
+            });
+            statusDiv.textContent = "● Vision Engine Active";
+            userInput.disabled = false;
+            sendBtn.disabled = false;
+            attachBtn.disabled = false;
+            userInput.placeholder = "Ask a question or upload an image...";
+            chatbox.innerHTML = `<div class="message ai-msg"><strong>Rainbow:</strong><br>Vision core ready! Feel free to ask questions or attach an image.</div>`;
+        } catch (error) {
+            statusDiv.textContent = "Engine Load Failed";
+            console.error(error);
+        }
+    }
+
+    async function handleSend() {
         const text = userInput.value.trim();
-        if (!text || !generatorPipeline) return;
+        if ((!text && !selectedImageBase64) || !engine) return;
 
-        // Render User Input
-        chatbox.innerHTML += `<div class="message user-msg">${text}</div>`;
-        userInput.value = "";
+        // Display user message
+        const displayLabel = text + (selectedImageBase64 ? " [Image Attached]" : "");
+        chatbox.innerHTML += `<div class="message user-msg">${displayLabel}</div>`;
+        userInput.value = '';
         chatbox.scrollTop = chatbox.scrollHeight;
 
-        statusDiv.innerText = "Computing tokens...";
-        statusDiv.style.color = "#ff9500"; // Processing orange color
+        let userContent = text;
+        if (selectedImageBase64) {
+            userContent = [
+                { type: "text", text: text || "Describe this image." },
+                { type: "image_url", image_url: { url: selectedImageBase64 } }
+            ];
+        }
+
+        currentMessages.push({ role: "user", content: userContent });
+
+        // Reset attachment state
+        selectedImageBase64 = null;
+        attachBtn.style.color = "var(--text-main)";
+        imageInput.value = "";
+
+        const aiMsgDiv = document.createElement('div');
+        aiMsgDiv.className = "message ai-msg";
+        aiMsgDiv.innerHTML = `<strong>Rainbow:</strong><br>Thinking...`;
+        chatbox.appendChild(aiMsgDiv);
+        chatbox.scrollTop = chatbox.scrollHeight;
+
         sendBtn.disabled = true;
 
         try {
-          const output = await generatorPipeline(text, {
-            max_new_tokens: 70,
-            temperature: 0.6,
-            repetition_penalty: 1.2,
-          });
+            const chunks = await engine.chat.completions.create({
+                messages: currentMessages,
+                stream: true,
+            });
 
-          let reply = output.generated_text;
+            let responseText = "";
+            for await (const chunk of chunks) {
+                responseText += chunk.choices[0]?.delta?.content || "";
+                aiMsgDiv.innerHTML = `<strong>Rainbow:</strong><br>${responseText}`;
+                chatbox.scrollTop = chatbox.scrollHeight;
+            }
 
-          // Text scrub cleaner
-          if (reply.includes(text)) {
-            reply = reply.replace(text, "").trim();
-          }
-
-          chatbox.innerHTML += `<div class="message ai-msg"><strong>Rainbow:</strong><br>${reply || "Inference completed safely."}</div>`;
+            currentMessages.push({ role: "assistant", content: responseText });
         } catch (err) {
-          chatbox.innerHTML += `<div class="message ai-msg" style="color:#ff3b30;">Execution context failure.</div>`;
+            aiMsgDiv.innerHTML = `<strong>Rainbow:</strong><br>Error processing request.`;
+            console.error(err);
         }
 
-        statusDiv.innerText = "● Engine Active";
-        statusDiv.style.color = "#34c759";
         sendBtn.disabled = false;
         chatbox.scrollTop = chatbox.scrollHeight;
-      };
+    }
 
-      // Automatically trigger on pressing regular text enter key without shifts
-      userInput.addEventListener("keydown", function (event) {
+    sendBtn.addEventListener('click', handleSend);
+    userInput.addEventListener("keydown", function(event) {
         if (event.key === "Enter" && !event.shiftKey) {
-          event.preventDefault();
-          generateText();
+            event.preventDefault();
+            handleSend();
         }
-      });
+    });
 
-      initAI();
-    </script>
-  </body>
+    initAI();
+</script>
+</body>
 </html>
