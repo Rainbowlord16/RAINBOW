@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAINBOW AI</title>
+    <title>Rainbow AI</title>
     <style>
         :root {
             /* Dark Theme Variables (Default) */
@@ -16,7 +16,6 @@
             --input-panel-bg: rgba(30, 41, 59, 0.7);
             --bubble-user: linear-gradient(135deg, #3b82f6, #a855f7);
             --bubble-ai: rgba(30, 41, 59, 0.85);
-            --image-accent: #06b6d4;
         }
 
         [data-theme="light"] {
@@ -30,7 +29,6 @@
             --input-panel-bg: rgba(255, 255, 255, 0.9);
             --bubble-user: linear-gradient(135deg, #3b82f6, #6366f1);
             --bubble-ai: rgba(241, 245, 249, 0.9);
-            --image-accent: #0284c7;
         }
 
         body, html {
@@ -53,7 +51,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Neural Network Interactive Layer Canvas */
+        /* Rainbow Neural Network Interactive Layer Canvas */
         #neuralCanvas {
             position: absolute;
             top: 0;
@@ -62,7 +60,7 @@
             height: 100%;
             z-index: 1;
             pointer-events: none;
-            opacity: 0.65;
+            opacity: 0.75;
         }
 
         .app-wrapper {
@@ -147,9 +145,10 @@
         }
 
         .sidebar-item {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-muted);
-            padding: 6px 0;
+            padding: 4px 0;
+            line-height: 1.4;
         }
 
         /* Workspace Grid Window Frame */
@@ -246,8 +245,8 @@
             border: none;
             color: var(--text-main);
             font-size: 18px;
-            cursor: pointer;
-            padding: 0;
+            cursor: not-allowed;
+            opacity: 0.4;
         }
 
         textarea {
@@ -279,7 +278,7 @@
             cursor: pointer;
         }
 
-        .send-btn:disabled, .attach-btn:disabled {
+        .send-btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
         }
@@ -287,14 +286,14 @@
 </head>
 <body>
 
-    <!-- Neural Network Node Canvas Matrix Component -->
+    <!-- Rainbow Neural Network Node Canvas Matrix Component -->
     <canvas id="neuralCanvas"></canvas>
 
     <div class="app-wrapper">
         <!-- Sidebar Navigation Block -->
         <div class="sidebar">
             <div class="logo-row">
-                <div class="logo">RAINBOW AI 🌈</div>
+                <div class="logo">Rainbow AI 🌈</div>
                 <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Light/Dark Theme">☀️</button>
             </div>
             
@@ -302,30 +301,31 @@
             
             <div class="sidebar-section">
                 <div class="sidebar-heading">Chat History</div>
-                <div class="sidebar-item">Local Vision Node Idle</div>
+                <div class="sidebar-item">Local Node Idle</div>
             </div>
 
             <div class="sidebar-section">
-                <div class="sidebar-heading">Active Pipeline</div>
-                <div class="sidebar-item" style="font-size:12px; font-weight:600;">Web-LLM (PaliGemma)</div>
+                <div class="sidebar-heading">Upcoming Features</div>
+                <div class="sidebar-item">• Image Processing Pipeline</div>
+                <div class="sidebar-item">• Video Stream Processing</div>
+                <div class="sidebar-item">• Code Sandbox Environment</div>
             </div>
         </div>
 
         <!-- Main Workspace Interface Panel -->
         <div class="main-chat">
             <div class="chat-header">
-                <h3 class="chat-title">Multimodal Local Core</h3>
-                <div id="status">Initializing WebGPU Engine...</div>
+                <h3 class="chat-title">Local Gemma Core</h3>
+                <div id="status">Syncing Neural Nodes...</div>
             </div>
 
             <div class="chat-messages" id="chatbox"></div>
 
             <div class="input-container">
                 <div class="input-wrapper">
-                    <input type="file" id="imageInput" accept="image/*" style="display: none;" />
-                    <button class="attach-btn" id="attachBtn" title="Upload Image" disabled>📎</button>
-                    <textarea id="userInput" placeholder="Loading engine weights..." disabled></textarea>
-                    <button class="send-btn" id="sendBtn" disabled>Send</button>
+                    <button class="attach-btn" disabled title="Coming soon">📎</button>
+                    <textarea id="userInput" placeholder="Loading dynamic weight matrices..." disabled></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="generateText()" disabled>Send</button>
                 </div>
             </div>
         </div>
@@ -351,18 +351,15 @@
     const statusDiv = document.getElementById('status');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
-    const attachBtn = document.getElementById('attachBtn');
-    const imageInput = document.getElementById('imageInput');
     const chatbox = document.getElementById('chatbox');
-
     let engine = null;
     let currentMessages = [];
-    let selectedImageBase64 = null;
 
-    // === NEURAL NETWORK BACKGROUND CANVAS ANIMATION MOTOR ===
+    // === RAINBOW NEURAL NETWORK BACKGROUND CANVAS ANIMATION MOTOR ===
     const canvas = document.getElementById('neuralCanvas');
     const ctx = canvas.getContext('2d');
     let particlesArray = [];
+    let hueShift = 0;
 
     function resizeCanvas() {
         canvas.width = window.innerWidth;
@@ -372,12 +369,13 @@
     resizeCanvas();
 
     class Particle {
-        constructor() {
+        constructor(index, total) {
             this.x = Math.random() * canvas.width;
             this.y = Math.random() * canvas.height;
             this.size = Math.random() * 2 + 1;
             this.speedX = Math.random() * 0.6 - 0.3;
             this.speedY = Math.random() * 0.6 - 0.3;
+            this.baseHue = (index / total) * 360;
         }
         update() {
             this.x += this.speedX;
@@ -385,39 +383,38 @@
             if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
             if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
         }
-        draw() {
-            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-            ctx.fillStyle = isLight ? 'rgba(168, 85, 247, 0.7)' : 'rgba(255, 255, 255, 0.7)';
+        draw(currentHue) {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            const nodeHue = (this.baseHue + currentHue) % 360;
+            ctx.fillStyle = `hsla(${nodeHue}, 85%, 65%, 0.8)`;
             ctx.fill();
         }
     }
 
-    function initParticles() {
-        particlesArray = [];
-        const count = Math.min(80, (canvas.width * canvas.height) / 15000);
-        for (let i = 0; i < count; i++) {
-            particlesArray.push(new Particle());
-        }
+    const particleCount = Math.floor(window.innerWidth / 20);
+    for (let i = 0; i < particleCount; i++) {
+        particlesArray.push(new Particle(i, particleCount));
     }
-    initParticles();
 
     function animateCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-        const lineColor = isLight ? '168, 85, 247' : '255, 255, 255';
+        hueShift += 0.15;
 
         for (let i = 0; i < particlesArray.length; i++) {
             particlesArray[i].update();
-            particlesArray[i].draw();
-            for (let j = i; j < particlesArray.length; j++) {
+            particlesArray[i].draw(hueShift);
+
+            for (let j = i + 1; j < particlesArray.length; j++) {
                 const dx = particlesArray[i].x - particlesArray[j].x;
                 const dy = particlesArray[i].y - particlesArray[j].y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance < 110) {
+
+                if (distance < 120) {
+                    const alpha = (1 - distance / 120) * 0.25;
+                    const lineHue = (particlesArray[i].baseHue + hueShift) % 360;
                     ctx.beginPath();
-                    ctx.strokeStyle = `rgba(${lineColor}, ${0.25 - distance/440})`;
+                    ctx.strokeStyle = `hsla(${lineHue}, 85%, 60%, ${alpha})`;
                     ctx.lineWidth = 0.8;
                     ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
                     ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
@@ -430,22 +427,7 @@
     }
     animateCanvas();
 
-    // === IMAGE ATTACHMENT HANDLING ===
-    attachBtn.addEventListener('click', () => imageInput.click());
-
-    imageInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(uploadEvent) {
-            selectedImageBase64 = uploadEvent.target.result;
-            attachBtn.style.color = "var(--image-accent)";
-        };
-        reader.readAsDataURL(file);
-    });
-
-    // === WEB-LLM MULTIMODAL ENGINE INITIALIZATION ===
+    // === WEB-LLM GEMMA ENGINE INITIALIZATION ===
     async function initAI() {
         try {
             engine = await CreateMLCEngine("gemma-2-2b-it-q4f16_1-MLC", {
@@ -453,50 +435,36 @@
                     statusDiv.textContent = p.text;
                 },
             });
-            statusDiv.textContent = "● Vision Engine Active";
+            statusDiv.textContent = "● Engine Active";
+            statusDiv.style.background = "rgba(52, 199, 89, 0.3)";
             userInput.disabled = false;
             sendBtn.disabled = false;
-            attachBtn.disabled = false;
-            userInput.placeholder = "Ask a question or upload an image...";
-            chatbox.innerHTML = `<div class="message ai-msg"><strong>Rainbow:</strong><br>Vision core ready! Feel free to ask questions or attach an image.</div>`;
+            userInput.placeholder = "Message Rainbow...";
+            chatbox.innerHTML = `<div class="message ai-msg"><strong>Rainbow:</strong><br>Hello! I am your local Gemma-powered assistant. How can I help you today?</div>`;
         } catch (error) {
-            statusDiv.textContent = "Engine Load Failed";
+            statusDiv.textContent = "Engine Link Error";
+            statusDiv.style.background = "rgba(255, 60, 48, 0.3)";
             console.error(error);
         }
     }
 
-    async function handleSend() {
+    window.generateText = async function() {
         const text = userInput.value.trim();
-        if ((!text && !selectedImageBase64) || !engine) return;
-
-        // Display user message
-        const displayLabel = text + (selectedImageBase64 ? " [Image Attached]" : "");
-        chatbox.innerHTML += `<div class="message user-msg">${displayLabel}</div>`;
+        if (!text || !engine) return;
+        
+        chatbox.innerHTML += `<div class="message user-msg">${text}</div>`;
+        currentMessages.push({ role: "user", content: text });
         userInput.value = '';
         chatbox.scrollTop = chatbox.scrollHeight;
-
-        let userContent = text;
-        if (selectedImageBase64) {
-            userContent = [
-                { type: "text", text: text || "Describe this image." },
-                { type: "image_url", image_url: { url: selectedImageBase64 } }
-            ];
-        }
-
-        currentMessages.push({ role: "user", content: userContent });
-
-        // Reset attachment state
-        selectedImageBase64 = null;
-        attachBtn.style.color = "var(--text-main)";
-        imageInput.value = "";
+        
+        statusDiv.textContent = "Computing Tensors...";
+        sendBtn.disabled = true;
 
         const aiMsgDiv = document.createElement('div');
         aiMsgDiv.className = "message ai-msg";
         aiMsgDiv.innerHTML = `<strong>Rainbow:</strong><br>Thinking...`;
         chatbox.appendChild(aiMsgDiv);
         chatbox.scrollTop = chatbox.scrollHeight;
-
-        sendBtn.disabled = true;
 
         try {
             const chunks = await engine.chat.completions.create({
@@ -513,19 +481,19 @@
 
             currentMessages.push({ role: "assistant", content: responseText });
         } catch (err) {
-            aiMsgDiv.innerHTML = `<strong>Rainbow:</strong><br>Error processing request.`;
+            aiMsgDiv.innerHTML = `<strong>Rainbow:</strong><br>Execution context exception.`;
             console.error(err);
         }
 
+        statusDiv.textContent = "● Engine Active";
         sendBtn.disabled = false;
         chatbox.scrollTop = chatbox.scrollHeight;
     }
 
-    sendBtn.addEventListener('click', handleSend);
     userInput.addEventListener("keydown", function(event) {
         if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
-            handleSend();
+            generateText();
         }
     });
 
