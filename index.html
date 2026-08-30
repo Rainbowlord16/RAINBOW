@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rainbow AI Assistant</title>
     
+    <!-- Rainbow Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='rg' x1='0%25' y1='0%25' x2='100%25' y2='100%'><stop offset='0%25' stop-color='%238b5cf6'/><stop offset='20%25' stop-color='%233b82f6'/><stop offset='40%25' stop-color='%2310b981'/><stop offset='60%25' stop-color='%23f59e0b'/><stop offset='80%25' stop-color='%23ef4444'/><stop offset='100%25' stop-color='%23ec4899'/></linearGradient></defs><rect width='512' height='512' rx='110' fill='%23ffffff'/><g transform='translate(56, 56) scale(0.78)'><path fill='url(%23rg)' d='M256 0C114.6 0 0 114.6 0 256c0 113.1 73.3 209.1 175 243.3 12.8 2.4 17.5-5.6 17.5-12.4 0-6.1-.2-22.3-.3-43.8-71.2 15.5-86.2-34.4-86.2-34.4-11.6-29.5-28.4-37.4-28.4-37.4-23.2-15.8 1.8-15.5 1.8-15.5 25.6 1.8 39.1 26.4 39.1 26.4 22.8 39.1 59.8 27.8 74.4 21.3 2.3-16.6 8.9-27.8 16.3-34.2-56.8-6.5-116.6-28.4-116.6-126.5 0-27.9 10-50.7 26.4-68.7-2.7-6.5-11.4-32.5 2.5-67.8 0 0 21.5-6.9 70.5 26.3 20.4-5.7 42.2-8.5 64.1-8.6 21.8.1 43.6 2.9 64.1 8.6 49-33.2 70.5-26.3 70.5-26.3 13.9 35.3 5.2 61.3 2.5 67.8 16.4 18 26.4 40.8 26.4 68.7 0 98.3-59.9 119.9-116.9 126.3 9.2 7.9 17.4 23.5 17.4 47.4 0 34.2-.3 61.7-.3 70 0 6.8 4.7 14.9 17.6 12.4C438.7 465.1 512 369.1 512 256 512 114.6 397.4 0 256 0z'/></g></svg>">
 
     <style>
@@ -16,25 +17,288 @@
         }
 
         body {
-            background-color: #0f172a;
-            color: #f8fafc;
+            background-color: #131314;
+            color: #e3e3e3;
             height: 100vh;
             display: flex;
             overflow: hidden;
         }
 
-        /* Sidebar Styling */
+        /* Sidebar Styling (Gemini Style) */
         .sidebar {
             position: fixed;
-            left: -280px;
+            left: 0;
             top: 0;
             width: 280px;
             height: 100vh;
-            background: #1e293b;
-            border-right: 1px solid #334155;
-            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #1e1f20;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1000;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transform: translateX(0);
+        }
+
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Gemini-style Toggle Button using your RAINBOW_favicon.svg */
+        .sidebar-toggle {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .sidebar-toggle:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-toggle svg {
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar ul li a {
+            color: #e3e3e3;
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 20px;
+            display: block;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .sidebar ul li a:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Main Chat Interface Layout */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin-left: 280px;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .main-container.expanded {
+            margin-left: 0;
+        }
+
+        .chat-header {
+            padding: 16px 24px;
+            background: #131314;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 1.15rem;
+            font-weight: 500;
+        }
+
+        .chat-messages {
+            flex: 1;
             padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .message {
+            padding: 16px;
+            border-radius: 16px;
+            line-height: 1.6;
+            max-width: 85%;
+        }
+
+        .message.ai {
+            background: #1e1f20;
+            align-self: flex-start;
+        }
+
+        .message.user {
+            background: #004a77;
+            color: #ffffff;
+            align-self: flex-end;
+        }
+
+        .chat-input-wrapper {
+            padding: 24px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .chat-input-area {
+            background: #1e1f20;
+            border-radius: 24px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input-area:focus-within {
+            border-color: #8ab4f8;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #e3e3e3;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .chat-input-area button {
+            background: #8ab4f8;
+            color: #202124;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+        }
+
+        .chat-input-area button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation Menu (Gemini Style) -->
+    <nav class="sidebar" id="appSidebar">
+        <div class="sidebar-header">
+            <button class="sidebar-toggle" id="menuToggle" aria-label="Toggle Sidebar">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                    <defs>
+                        <linearGradient id="rgBtn" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#8b5cf6" />
+                            <stop offset="20%" stop-color="#3b82f6" />
+                            <stop offset="40%" stop-color="#10b981" />
+                            <stop offset="60%" stop-color="#f59e0b" />
+                            <stop offset="80%" stop-color="#ef4444" />
+                            <stop offset="100%" stop-color="#ec4899" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="512" height="512" rx="110" fill="#ffffff" />
+                    <g transform="translate(56, 56) scale(0.78)">
+                        <path fill="url(#rgBtn)" d="M256 0C114.6 0 0 114.6 0 256c0 113.1 73.3 209.1 175 243.3 12.8 2.4 17.5-5.6 17.5-12.4 0-6.1-.2-22.3-.3-43.8-71.2 15.5-86.2-34.4-86.2-34.4-11.6-29.5-28.4-37.4-28.4-37.4-23.2-15.8 1.8-15.5 1.8-15.5 25.6 1.8 39.1 26.4 39.1 26.4 22.8 39.1 59.8 27.8 74.4 21.3 2.3-16.6 8.9-27.8 16.3-34.2-56.8-6.5-116.6-28.4-116.6-126.5 0-27.9 10-50.7 26.4-68.7-2.7-6.5-11.4-32.5 2.5-67.8 0 0 21.5-6.9 70.5 26.3 20.4-5.7 42.2-8.5 64.1-8.6 21.8.1 43.6 2.9 64.1 8.6 49-33.2 70.5-26.3 70.5-26.3 13.9 35.3 5.2 61.3 2.5 67.8 16.4 18 26.4 40.8 26.4 68.7 0 98.3-59.9 119.9-116.9 126.3 9.2 7.9 17.4 23.5 17.4 47.4 0 34.2-.3 61.7-.3 70 0 6.8 4.7 14.9 17.6 12.4C438.7 465.1 512 369.1 512 256 512 114.6 397.4 0 256 0z"/>
+                    </g>
+                </svg>
+            </button>
+            <span style="font-weight: 500; font-size: 1.05rem;">Rainbow AI</span>
+        </div>
+        <ul>
+            <li><a href="#">💬 New chat</a></li>
+            <li><a href="#">🏸 Badminton Stats</a></li>
+            <li><a href="#">🎨 Manga Art Generator</a></li>
+            <li><a href="#">⚙️ Settings</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Chat Workspace -->
+    <div class="main-container" id="mainContainer">
+        <header class="chat-header">
+            <!-- Toggle button also accessible in header when sidebar is closed if desired, or controlled via sidebar -->
+            <span>Herish's Workspace</span>
+        </header>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai">
+                Hello Herish! 🌟 Your Gemini-style layout with your custom rainbow favicon toggle button is ready. What would you like to do next? 🚀
+            </div>
+        </div>
+
+        <div class="chat-input-wrapper">
+            <div class="chat-input-area">
+                <input type="text" id="userInput" placeholder="Enter a prompt here..." />
+                <button id="sendBtn">&#8593;</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Gemini-style Sidebar Toggle Logic
+        const toggleBtn = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('appSidebar');
+        const mainContainer = document.getElementById('mainContainer');
+
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('closed');
+            mainContainer.classList.toggle('expanded');
+        });
+
+        // Chat Interaction Script
+        const sendBtn = document.getElementById('sendBtn');
+        const userInput = document.getElementById('userInput');
+        const chatMessages = document.getElementById('chatMessages');
+
+        function handleSendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.textContent = text;
+            chatMessages.appendChild(userMsg);
+
+            userInput.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'message ai';
+                aiMsg.textContent = `Received: "${text}". Ready when you are to hook up Node.js or WebGPU! ✨`;
+                chatMessages.appendChild(aiMsg);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 500);
+        }
+
+        sendBtn.addEventListener('click', handleSendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSendMessage();
+        });
+    </script>
+</body>
+</html>            padding: 24px;
             display: flex;
             flex-direction: column;
             gap: 20px;
