@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rainbow AI Ecosystem</title>
+    <title>Rainbow AI</title>
+    <!-- Google Fonts: Inter (Gemini-style clean, light sans-serif typeface) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -576,9 +577,11 @@
 </head>
 <body>
 
+    <!-- Rainbow Neural Background Canvas -->
     <canvas id="neuralCanvas"></canvas>
 
     <div class="app-container">
+        <!-- Sidebar -->
         <div class="sidebar" id="appSidebar">
             <div class="sidebar-header">
                 <div class="logo-area">Rainbow AI 🌈</div>
@@ -600,16 +603,17 @@
             <div class="history-list" id="historyList"></div>
         </div>
 
+        <!-- Main Content Area -->
         <div class="main-content">
 
+            <!-- Chat View Panel -->
             <div class="view-panel active" id="view-chat">
                 <div class="panel-header">
                     <div class="header-left">
                         <button class="sidebar-toggle-btn" id="sidebarToggleBtn" onclick="toggleSidebar()" title="Toggle Sidebar">
                             <img src="RAINBOW_favicon.svg" alt="Toggle" style="width: 20px; height: 20px; display: block; border-radius: 4px;" />
                         </button>
-                        <button class="new-chat-btn" onclick="quitApp()" style="background: linear-gradient(135deg, #ef4444, #f97316); margin-top: 8px;">🛑 Quit / Reset App</button>
-                        <h3 class="panel-title" id="activeChatTitle">Rainbow</h3>
+                        <h3 class="panel-title" id="activeChatTitle">Local Intelligence Node</h3>
                     </div>
                     <div id="status" class="status-badge">Syncing Nodes...</div>
                 </div>
@@ -630,6 +634,7 @@
                 </div>
             </div>
 
+            <!-- Spectra Image Generator View Panel -->
             <div class="view-panel" id="view-spectra">
                 <div class="panel-header">
                     <div class="header-left">
@@ -662,6 +667,7 @@
                 </div>
             </div>
 
+            <!-- Nova Kids Assistant View Panel -->
             <div class="view-panel" id="view-nova">
                 <div class="panel-header">
                     <div class="header-left">
@@ -677,20 +683,23 @@
                         <h2>Hi friend! I'm Nova! 👋</h2>
                         <p>I'm here to help you explore science, tell fun stories, answer big questions, and cheer you on! What shall we discover today?</p>
                     </div>
-                    <div id="novaChatbox" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;"></div>
-<div class="input-box-wrapper">
-    <textarea class="input-textarea" id="novaInput" style="height: 40px;" placeholder="Ask Nova a fun question like 'Why is the sky blue?'"></textarea>
-    <div class="input-toolbar">
-        <div class="multimodal-tools">
-            <button class="tool-chip">🎨 Draw Together</button>
-            <button class="tool-chip">📖 Story Mode</button>
-        </div>
-        <button class="send-action-btn" id="novaSendBtn" onclick="handleNovaSend()">Ask Nova</button>
-    </div>
-</div>
+
+                    <!-- Chat display area for Nova -->
+                    <div id="novaChatbox" style="display: flex; flex-direction: column; gap: 12px; max-height: 250px; overflow-y: auto;"></div>
+
+                    <div class="input-box-wrapper">
+                        <textarea class="input-textarea" id="novaInput" style="height: 40px;" placeholder="Ask Nova a fun question like 'Why is the sky blue?'"></textarea>
+                        <div class="input-toolbar">
+                            <div class="multimodal-tools">
+                                <button class="tool-chip" onclick="document.getElementById('novaInput').value='Tell me a fun space story!'; handleNovaSend();">📖 Story Mode</button>
+                            </div>
+                            <button class="send-action-btn" onclick="handleNovaSend()">Ask Nova</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
+            <!-- Upcoming Features Roadmap View Panel -->
             <div class="view-panel" id="view-features">
                 <div class="panel-header">
                     <div class="header-left">
@@ -764,8 +773,21 @@
         document.getElementById('view-' + viewName).classList.add('active');
         event.currentTarget.classList.add('active');
     }
+
+    // Spectra Simulation Fallback
+    function generateSpectraImage() {
+        const prompt = document.getElementById('spectraPrompt').value.trim();
+        if(!prompt) return;
+        const gallery = document.getElementById('spectraGallery');
+        const card = document.createElement('div');
+        card.className = 'spectra-card';
+        card.innerHTML = `<div class="spectra-preview" style="background: linear-gradient(135deg, #${Math.floor(Math.random()*16777215).toString(16)}, #${Math.floor(Math.random()*16777215).toString(16)});">${prompt.substring(0, 18)}...</div><div style="padding: 12px; font-size: 12px; font-weight: 300; color: var(--text-muted);">Prompt: ${prompt}</div>`;
+        gallery.prepend(card);
+        document.getElementById('spectraPrompt').value = '';
+    }
 </script>
 
+<!-- Web-LLM Gemma 2B Text Pipeline & Nova Integration -->
 <script type="module">
     import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
 
@@ -1064,6 +1086,55 @@
         chatbox.scrollTop = chatbox.scrollHeight;
     }
 
+    // === NOVA KIDS ASSISTANT GEMMA SHARING ===
+    window.handleNovaSend = async function() {
+        const input = document.getElementById('novaInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        if (!engine) {
+            alert("Please wait for the main Gemma engine to finish syncing in the Chat tab first!");
+            return;
+        }
+
+        const novaContainer = document.getElementById('novaChatbox');
+        if (!novaContainer) return;
+        
+        // Show user message in Nova tab
+        const userMsg = document.createElement('div');
+        userMsg.style.cssText = "align-self: flex-end; background: #3b82f6; color: white; padding: 10px 14px; border-radius: 12px; max-width: 80%; font-size: 13px;";
+        userMsg.textContent = text;
+        novaContainer.appendChild(userMsg);
+        input.value = '';
+
+        // Show Nova's thinking bubble
+        const novaMsg = document.createElement('div');
+        novaMsg.style.cssText = "align-self: flex-start; background: var(--panel-bg); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 12px; max-width: 80%; font-size: 13px;";
+        novaMsg.textContent = "Nova is thinking... ✨";
+        novaContainer.appendChild(novaMsg);
+        novaContainer.scrollTop = novaContainer.scrollHeight;
+
+        try {
+            const chunks = await engine.chat.completions.create({
+                messages: [
+                    { role: "system", content: "You are Nova, a friendly, playful, and safe learning assistant for kids. Keep answers encouraging, simple, and fun." },
+                    { role: "user", content: text }
+                ],
+                stream: true,
+            });
+
+            let responseText = "";
+            for await (const chunk of chunks) {
+                responseText += chunk.choices[0]?.delta?.content || "";
+                novaMsg.textContent = responseText;
+                novaContainer.scrollTop = novaContainer.scrollHeight;
+            }
+        } catch (err) {
+            novaMsg.textContent = "Oops! Nova got stuck for a second. Try asking again!";
+            console.log(err);
+        }
+    };
+
     userInput.addEventListener("keydown", function(event) {
         if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
@@ -1071,67 +1142,17 @@
         }
     });
 
-    window.handleNovaSend = async function() {
-    const input = document.getElementById('novaInput');
-    const text = input.value.trim();
-    if (!text || !engine) {
-        if (!engine) alert("Please wait for Gemma engine to finish syncing first!");
-        return;
-    }
-
-    const novaContainer = document.getElementById('novaChatbox');
-    
-    // Show user message in Nova tab
-    const userMsg = document.createElement('div');
-    userMsg.style.cssText = "align-self: flex-end; background: #3b82f6; color: white; padding: 10px 14px; border-radius: 12px; max-width: 80%; font-size: 13px;";
-    userMsg.textContent = text;
-    novaContainer.appendChild(userMsg);
-    input.value = '';
-
-    // Show Nova's thinking bubble
-    const novaMsg = document.createElement('div');
-    novaMsg.style.cssText = "align-self: flex-start; background: var(--panel-bg); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 12px; max-width: 80%; font-size: 13px;";
-    novaMsg.textContent = "Nova is thinking... ✨";
-    novaContainer.appendChild(novaMsg);
-
-    try {
-        // Send prompt to the Gemma 2B engine with a kid-friendly system instruction
-        const chunks = await engine.chat.completions.create({
-            messages: [
-                { role: "system", content: "You are Nova, a friendly, playful, and safe learning assistant for kids. Keep answers encouraging, simple, and fun." },
-                { role: "user", content: text }
-            ],
-            stream: true,
+    const novaInputEl = document.getElementById('novaInput');
+    if (novaInputEl) {
+        novaInputEl.addEventListener("keydown", function(event) {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                handleNovaSend();
+            }
         });
-
-        let responseText = "";
-        for await (const chunk of chunks) {
-            responseText += chunk.choices[0]?.delta?.content || "";
-            novaMsg.textContent = responseText;
-        }
-    } catch (err) {
-        novaMsg.textContent = "Oops! Nova got stuck for a second. Try asking again!";
-        console.error(err);
     }
-};
-
-    window.quitApp = function() {
-    // Clear local storage session cache if needed
-    if (confirm("Are you sure you want to completely reset and clear the local AI engines?")) {
-        // Clear active engines
-        if (window.imageGenerator) {
-            window.imageGenerator = null;
-        }
-        
-        // Clear stored chat memory
-        localStorage.removeItem("rainbow_ecosystem_chats");
-        
-        // Reload the page to release all WebGPU VRAM/RAM allocations back to macOS
-        window.location.reload();
-    }
-};
 
     initAI();
 </script>
 </body>
-</html> 
+</html>
