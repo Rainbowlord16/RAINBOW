@@ -677,16 +677,16 @@
                         <h2>Hi friend! I'm Nova! 👋</h2>
                         <p>I'm here to help you explore science, tell fun stories, answer big questions, and cheer you on! What shall we discover today?</p>
                     </div>
-                    <div class="input-box-wrapper">
-                        <textarea class="input-textarea" style="height: 40px;" placeholder="Ask Nova a fun question like 'Why is the sky blue?'"></textarea>
-                        <div class="input-toolbar">
-                            <div class="multimodal-tools">
-                                <button class="tool-chip">🎨 Draw Together</button>
-                                <button class="tool-chip">📖 Story Mode</button>
-                            </div>
-                            <button class="send-action-btn" onclick="alert('Nova assistant session started!')">Ask Nova</button>
-                        </div>
-                    </div>
+<div class="input-box-wrapper">
+    <textarea class="input-textarea" id="novaInput" style="height: 40px;" placeholder="Ask Nova a fun question like 'Why is the sky blue?'"></textarea>
+    <div class="input-toolbar">
+        <div class="multimodal-tools">
+            <button class="tool-chip">🎨 Draw Together</button>
+            <button class="tool-chip">📖 Story Mode</button>
+        </div>
+        <button class="send-action-btn" id="novaSendBtn" onclick="handleNovaSend()">Ask Nova</button>
+    </div>
+</div>
                 </div>
             </div>
 
