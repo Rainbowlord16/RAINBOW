@@ -616,9 +616,9 @@
                 <div class="panel-header">
                     <div class="header-left">
                         <button class="sidebar-toggle-btn" id="sidebarToggleBtn" onclick="toggleSidebar()" title="Toggle Sidebar">
-                            <img src="RAINBOW_favicon.svg" alt="Toggle" style="width: 20px; height: 20px; display: block; border-radius: 4px;" />
+                            <img src="Rainbow_favicon.svg" alt="Toggle" style="width: 20px; height: 20px; display: block; border-radius: 4px;" />
                         </button>
-                        <h3 class="panel-title" id="activeChatTitle">Local Intelligence Node</h3>
+                        <h3 class="panel-title" id="activeChatTitle"></h3>
                     </div>
                     <div id="status" class="status-badge">Syncing Nodes...</div>
                 </div>
@@ -990,7 +990,7 @@
     window.startNewChat = function() {
         currentSessionId = Date.now().toString();
         currentMessages = [];
-        activeChatTitle.textContent = "Local Intelligence Node";
+        activeChatTitle.textContent = "Rainbow";
         chatbox.innerHTML = "";
         appendMessage("ai", "New session initialized. What shall we explore or build together?");
         renderHistoryList();
@@ -1739,7 +1739,7 @@
                         <button class="sidebar-toggle-btn" id="sidebarToggleBtn" onclick="toggleSidebar()" title="Toggle Sidebar">
                             <img src="RAINBOW_favicon.svg" alt="Toggle" style="width: 20px; height: 20px; display: block; border-radius: 4px;" />
                         </button>
-                        <h3 class="panel-title" id="activeChatTitle">Local Intelligence Node</h3>
+                        <h3 class="panel-title" id="activeChatTitle">Rainbow</h3>
                     </div>
                     <div id="status" class="status-badge">Syncing Nodes...</div>
                 </div>
