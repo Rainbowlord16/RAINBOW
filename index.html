@@ -377,11 +377,12 @@
             border: 1px solid var(--border-color);
             backdrop-filter: blur(15px);
         }
-        /* Markdown formatting inside AI bubbles */
+        /* Separated Markdown Styling for Code vs Text Blocks */
         .ai .message-bubble p { margin-bottom: 10px; }
         .ai .message-bubble p:last-child { margin-bottom: 0; }
-        .ai .message-bubble pre { background: #0f172a; padding: 12px; border-radius: 8px; margin: 10px 0; overflow-x: auto; }
-        .ai .message-bubble code { font-family: monospace; font-size: 13px; }
+        .ai .message-bubble pre { background: #0f172a; padding: 14px; border-radius: 10px; margin: 12px 0; overflow-x: auto; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .ai .message-bubble code { font-family: monospace; font-size: 13px; color: #e2e8f0; }
+        .ai .message-bubble p code { background: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 4px; }
         .ai .message-bubble ul, .ai .message-bubble ol { margin-left: 20px; margin-bottom: 10px; }
 
         .message-footer {
@@ -668,7 +669,7 @@
                 <div class="chat-messages" id="chatbox"></div>
 
                 <div class="chat-input-area">
-                    <!-- Feature #1: Quick Prompt Suggestion Chips -->
+                    <!-- Quick Prompt Suggestion Chips -->
                     <div class="quick-chips-container">
                         <button class="tool-chip" onclick="fillPrompt('Write a short sci-fi story about a robot learning to code')">📖 Sci-Fi Story</button>
                         <button class="tool-chip" onclick="fillPrompt('Explain how asynchronous JavaScript works with an example')">💻 JS Async Guide</button>
@@ -841,7 +842,7 @@
         document.getElementById('spectraPrompt').value = '';
     }
 
-    // Feature #1 Helper: Fill Prompt Chip text into input
+    // Quick Prompt Chip Input Fill
     window.fillPrompt = function(text) {
         const input = document.getElementById('userInput');
         input.value = text;
@@ -865,7 +866,7 @@
     let currentSessionId = null;
     let currentMessages = [];
 
-    // Feature #4: Custom AI Personas definitions
+    // Custom AI Personas definitions
     const personas = {
         general: "You are Rainbow, a helpful, playful, and brilliant personal AI assistant built by Herish. Always refer to yourself as Rainbow when asked your name.",
         coder: "You are Rainbow Coder, an elite expert programmer and software architect built by Herish. Give clean, well-commented code snippets and precise technical advice.",
@@ -1016,7 +1017,7 @@
         }
     }
 
-    // Feature #2 Helper: Export current chat as .txt file
+    // Export current chat as .txt file
     window.exportCurrentChat = function() {
         if (!currentMessages || currentMessages.length <= 1) {
             alert("There is no active conversation to export yet!");
@@ -1120,10 +1121,8 @@
         const bubble = document.createElement("div");
         bubble.className = "message-bubble";
 
-        // Feature #3: Render Markdown and Syntax Highlighting for AI responses
         if (role === 'ai') {
             bubble.innerHTML = marked.parse(text);
-            // Apply highlight.js to code blocks
             bubble.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightElement(block);
             });
@@ -1139,10 +1138,15 @@
         footer.innerHTML = `<span>${timeStr}</span>`;
 
         if (role === 'ai') {
+            // Copy Response text button
             const copyBtn = document.createElement("button");
             copyBtn.className = "icon-btn";
-            copyBtn.textContent = "📋 Copy";
-            copyBtn.onclick = () => { navigator.clipboard.writeText(text); alert("Copied to clipboard!"); };
+            copyBtn.textContent = "📋 Copy Response";
+            copyBtn.onclick = () => { 
+                navigator.clipboard.writeText(text); 
+                copyBtn.textContent = "✨ Copied!";
+                setTimeout(() => copyBtn.textContent = "📋 Copy Response", 2000);
+            };
             footer.appendChild(copyBtn);
         }
 
