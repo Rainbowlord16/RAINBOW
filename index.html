@@ -12,14 +12,14 @@
     <style>
         :root {
             --bg-base: #0b0f19;
-            --sidebar-bg: rgba(15, 23, 42, 0.45);
+            --sidebar-bg: rgba(15, 23, 42, 0.65);
             --chat-bg: transparent;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border-color: rgba(255, 255, 255, 0.08);
-            --panel-bg: rgba(30, 41, 59, 0.4);
+            --panel-bg: rgba(30, 41, 59, 0.55);
             --bubble-user: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            --bubble-ai: rgba(30, 41, 59, 0.6);
+            --bubble-ai: rgba(30, 41, 59, 0.75);
             --accent-glow: rgba(168, 85, 247, 0.4);
             --danger: #ef4444;
             --success: #10b981;
@@ -27,14 +27,14 @@
 
         [data-theme="light"] {
             --bg-base: #f1f5f9;
-            --sidebar-bg: rgba(255, 255, 255, 0.55);
+            --sidebar-bg: rgba(255, 255, 255, 0.75);
             --chat-bg: transparent;
             --text-main: #0f172a;
             --text-muted: #64748b;
             --border-color: rgba(0, 0, 0, 0.08);
-            --panel-bg: rgba(255, 255, 255, 0.65);
+            --panel-bg: rgba(255, 255, 255, 0.85);
             --bubble-user: linear-gradient(135deg, #3b82f6, #6366f1);
-            --bubble-ai: rgba(241, 245, 249, 0.75);
+            --bubble-ai: rgba(241, 245, 249, 0.9);
             --accent-glow: rgba(168, 85, 247, 0.2);
             --danger: #dc2626;
             --success: #059669;
@@ -52,7 +52,7 @@
             transition: background 0.3s ease, color 0.3s ease;
         }
 
-        /* Rainbow Neural Background Canvas */
+        /* Pure Particle Canvas Background */
         #neuralCanvas {
             position: fixed;
             top: 0;
@@ -75,8 +75,8 @@
         .sidebar {
             width: 300px;
             background: var(--sidebar-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
@@ -251,8 +251,6 @@
         .main-content {
             flex-grow: 1;
             background: var(--chat-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
             height: 100%;
@@ -274,7 +272,7 @@
             align-items: center;
             justify-content: space-between;
             background: var(--panel-bg);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
         }
 
         .header-left {
@@ -358,7 +356,7 @@
             color: var(--text-main);
             border-bottom-left-radius: 4px;
             border: 1px solid var(--border-color);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
         }
 
         .message-footer {
@@ -387,7 +385,7 @@
             padding: 12px 16px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.1);
             transition: border-color 0.2s;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
         }
         .input-box-wrapper:focus-within { border-color: #8b5cf6; }
 
@@ -473,7 +471,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
         }
 
         .spectra-gallery {
@@ -489,7 +487,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
         }
         .spectra-preview {
             width: 100%;
@@ -549,7 +547,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
             transition: transform 0.2s, border-color 0.2s;
         }
         .feature-card:hover {
