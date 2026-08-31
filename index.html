@@ -54,14 +54,13 @@
 
         /* Rainbow Neural Background Canvas */
         #neuralCanvas {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             z-index: 1;
             pointer-events: none;
-            opacity: 0.85;
         }
 
         .app-container {
@@ -830,9 +829,9 @@
         constructor(index, total) {
             this.x = Math.random() * canvas.width;
             this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 1.8 + 1;
-            this.speedX = Math.random() * 0.4 - 0.2;
-            this.speedY = Math.random() * 0.4 - 0.2;
+            this.size = Math.random() * 2 + 1.2;
+            this.speedX = Math.random() * 0.5 - 0.25;
+            this.speedY = Math.random() * 0.5 - 0.25;
             this.baseHue = (index / total) * 360;
         }
         update() {
@@ -845,19 +844,19 @@
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
             const nodeHue = (this.baseHue + currentHue) % 360;
-            ctx.fillStyle = `hsla(${nodeHue}, 90%, 55%, 0.9)`;
+            ctx.fillStyle = `hsla(${nodeHue}, 95%, 60%, 0.95)`;
             ctx.fill();
         }
     }
 
-    const particleCount = Math.floor(window.innerWidth / 24);
+    const particleCount = Math.floor(window.innerWidth / 22);
     for (let i = 0; i < particleCount; i++) {
         particlesArray.push(new Particle(i, particleCount));
     }
 
     function animateCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        hueShift += 0.12;
+        hueShift += 0.15;
 
         for (let i = 0; i < particlesArray.length; i++) {
             particlesArray[i].update();
@@ -868,12 +867,12 @@
                 const dy = particlesArray[i].y - particlesArray[j].y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
-                if (distance < 130) {
-                    const alpha = (1 - distance / 130) * 0.3;
+                if (distance < 140) {
+                    const alpha = (1 - distance / 140) * 0.35;
                     const lineHue = (particlesArray[i].baseHue + hueShift) % 360;
                     ctx.beginPath();
-                    ctx.strokeStyle = `hsla(${lineHue}, 90%, 55%, ${alpha})`;
-                    ctx.lineWidth = 0.8;
+                    ctx.strokeStyle = `hsla(${lineHue}, 95%, 60%, ${alpha})`;
+                    ctx.lineWidth = 0.9;
                     ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
                     ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
                     ctx.stroke();
@@ -980,7 +979,6 @@
         const session = chatSessions.find((s) => s.id === sessionId);
         currentMessages = session ? [...session.messages] : [];
 
-        // Ensure system prompt identity exists in conversation history
         if (!currentMessages.some(m => m.role === "system")) {
             currentMessages.unshift(RAINBOW_SYSTEM_PROMPT);
         }
@@ -1001,7 +999,6 @@
 
     window.startNewChat = function() {
         currentSessionId = Date.now().toString();
-        // Give Gemma the Rainbow system identity
         currentMessages = [RAINBOW_SYSTEM_PROMPT];
         activeChatTitle.textContent = "Local Intelligence Node";
         chatbox.innerHTML = "";
@@ -1118,14 +1115,12 @@
         const novaContainer = document.getElementById('novaChatbox');
         if (!novaContainer) return;
         
-        // Show user message in Nova tab
         const userMsg = document.createElement('div');
         userMsg.style.cssText = "align-self: flex-end; background: #3b82f6; color: white; padding: 10px 14px; border-radius: 12px; max-width: 80%; font-size: 13px;";
         userMsg.textContent = text;
         novaContainer.appendChild(userMsg);
         input.value = '';
 
-        // Show Nova's thinking bubble
         const novaMsg = document.createElement('div');
         novaMsg.style.cssText = "align-self: flex-start; background: var(--panel-bg); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 12px; max-width: 80%; font-size: 13px;";
         novaMsg.textContent = "Nova is thinking... ✨";
