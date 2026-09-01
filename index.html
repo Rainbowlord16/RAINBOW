@@ -363,6 +363,7 @@
             line-height: 1.6;
             word-wrap: break-word;
             box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            position: relative;
         }
         .user .message-bubble {
             background: var(--bubble-user);
@@ -377,13 +378,42 @@
             border: 1px solid var(--border-color);
             backdrop-filter: blur(15px);
         }
-        /* Separated Markdown Styling for Code vs Text Blocks */
+        
+        /* Markdown Styling & Code Blocks */
         .ai .message-bubble p { margin-bottom: 10px; }
         .ai .message-bubble p:last-child { margin-bottom: 0; }
-        .ai .message-bubble pre { background: #0f172a; padding: 14px; border-radius: 10px; margin: 12px 0; overflow-x: auto; border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        .code-block-wrapper {
+            position: relative;
+            margin: 12px 0;
+        }
+        .ai .message-bubble pre { 
+            background: #0f172a; 
+            padding: 14px; 
+            padding-top: 36px; /* space for copy button */
+            border-radius: 10px; 
+            overflow-x: auto; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+        }
         .ai .message-bubble code { font-family: monospace; font-size: 13px; color: #e2e8f0; }
         .ai .message-bubble p code { background: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 4px; }
         .ai .message-bubble ul, .ai .message-bubble ol { margin-left: 20px; margin-bottom: 10px; }
+
+        /* Floating Copy Button inside Code Blocks */
+        .copy-code-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #cbd5e1;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-code-btn:hover { background: rgba(255, 255, 255, 0.2); color: white; }
 
         .message-footer {
             display: flex;
@@ -673,7 +703,7 @@
                     <div class="quick-chips-container">
                         <button class="tool-chip" onclick="fillPrompt('Write a short sci-fi story about a robot learning to code')">📖 Sci-Fi Story</button>
                         <button class="tool-chip" onclick="fillPrompt('Explain how asynchronous JavaScript works with an example')">💻 JS Async Guide</button>
-                        <button class="tool-chip" onclick="fillPrompt('Give me three tips to improve my badminton smash')">🏸 Badminton Tips</button>
+                        <button class="tool-chip" onclick="fillPrompt('Write a short poem about coding under a rainbow sky')">✨ Poem Request</button>
                         <button class="tool-chip" onclick="fillPrompt('Write a fun python script to draw a rainbow')">🎨 Python Rainbow</button>
                     </div>
 
@@ -1114,6 +1144,42 @@
         renderHistoryList();
     }
 
+    // Helper to process markdown formatting and inject individual copy buttons for code/poems
+    function processAIMessageHTML(text) {
+        let html = marked.parse(text);
+
+        // Wrap code blocks `<pre><code>` with a wrapper and individual copy button
+        html = html.replace(/<pre><code\b([^>]*)>([\s\S]*?)<\/code><\/pre>/gi, (match, attrs, codeContent) => {
+            // Decode HTML entities temporarily to copy raw text correctly
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = codeContent;
+            const rawCode = tempDiv.textContent;
+            
+            // Encode safely for an inline JS onclick handler
+            const encodedCode = encodeURIComponent(rawCode);
+
+            return `<div class="code-block-wrapper">
+                <button class="copy-code-btn" onclick="copySnippet(decodeURIComponent('${encodedCode}'), this)">📋 Copy Code</button>
+                <pre><code${attrs}>${codeContent}</code></pre>
+            </div>`;
+        });
+
+        return html;
+    }
+
+    window.copySnippet = function(text, btn) {
+        navigator.clipboard.writeText(text);
+        const originalText = btn.textContent;
+        btn.textContent = "✨ Copied!";
+        btn.style.background = "rgba(16, 185, 129, 0.2)";
+        btn.style.color = "#10b981";
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = "rgba(255, 255, 255, 0.1)";
+            btn.style.color = "#cbd5e1";
+        }, 2000);
+    };
+
     function appendMessage(role, text, save = true) {
         const row = document.createElement("div");
         row.className = `message-row ${role}`;
@@ -1122,7 +1188,7 @@
         bubble.className = "message-bubble";
 
         if (role === 'ai') {
-            bubble.innerHTML = marked.parse(text);
+            bubble.innerHTML = processAIMessageHTML(text);
             bubble.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightElement(block);
             });
@@ -1138,14 +1204,14 @@
         footer.innerHTML = `<span>${timeStr}</span>`;
 
         if (role === 'ai') {
-            // Copy Response text button
+            // Copy Full Response button
             const copyBtn = document.createElement("button");
             copyBtn.className = "icon-btn";
-            copyBtn.textContent = "📋 Copy Response";
+            copyBtn.textContent = "📋 Copy Full Response";
             copyBtn.onclick = () => { 
                 navigator.clipboard.writeText(text); 
-                copyBtn.textContent = "✨ Copied!";
-                setTimeout(() => copyBtn.textContent = "📋 Copy Response", 2000);
+                copyBtn.textContent = "✨ Copied Full Text!";
+                setTimeout(() => copyBtn.textContent = "📋 Copy Full Response", 2000);
             };
             footer.appendChild(copyBtn);
         }
@@ -1207,7 +1273,7 @@
             let responseText = "";
             for await (const chunk of chunks) {
                 responseText += chunk.choices[0]?.delta?.content || "";
-                aiBubble.innerHTML = marked.parse(responseText);
+                aiBubble.innerHTML = processAIMessageHTML(responseText);
                 aiBubble.querySelectorAll('pre code').forEach((block) => {
                     hljs.highlightElement(block);
                 });
