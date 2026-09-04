@@ -933,8 +933,8 @@
         input.focus();
     };
 
-// Feature: Speech-to-Text Voice Input Handler with Robust Permission & Event Handling
-let recognition = null;
+    // Feature: Speech-to-Text Voice Input Handler (Fixed Transcript Binding)
+    let recognition = null;
     let isRecording = false;
 
     window.toggleVoiceInput = function() {
@@ -961,33 +961,18 @@ let recognition = null;
                 };
 
                 recognition.onresult = (event) => {
-                    let finalTranscript = '';
-                    let interimTranscript = '';
-
-                    for (let i = event.resultIndex; i < event.results.length; ++i) {
-                        if (event.results[i].isFinal) {
-                            finalTranscript += event.results[i][0].transcript;
-                        } else {
-                            interimTranscript += event.results[i][0].transcript;
-                        }
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        transcript += event.results[i][0].transcript;
                     }
-
-                    // Put whichever text is available directly into the text box
-                    const textToShow = finalTranscript || interimTranscript;
-                    if (textToShow) {
-                        input.value = textToShow;
+                    if (transcript) {
+                        input.value = transcript;
                         input.focus();
                     }
                 };
 
-                recognition.onerror = (event) => {
-                    console.error("Speech recognition error:", event.error);
-                    stopVoice();
-                };
-
-                recognition.onend = () => {
-                    stopVoice();
-                };
+                recognition.onerror = () => { stopVoice(); };
+                recognition.onend = () => { stopVoice(); };
             } catch (err) {
                 console.error("Speech init error:", err);
             }
@@ -1013,8 +998,10 @@ let recognition = null;
             voiceBtn.textContent = '🎙️ Voice';
         }
     }
-    // Feature: Interactive Code Sandbox Playground Runner
-    window.runCodeSnippet = function(code, btn) {
+
+    // Feature: Interactive Code Sandbox Playground Runner (Fixed Scope & Execution)
+    window.runCodeSnippet = function(encodedCode, btn) {
+        const code = decodeURIComponent(encodedCode);
         const wrapper = btn.closest('.code-block-wrapper');
         let outputBox = wrapper.querySelector('.code-sandbox-output');
         
@@ -1036,8 +1023,8 @@ let recognition = null;
             const runFn = new Function(code);
             const result = runFn();
             
-            if (result !== undefined) {
-                logs.push(`Output: ${result}`);
+            if (result !== undefined && logs.length === 0) {
+                logs.push(`Result: ${result}`);
             }
             
             if (logs.length === 0) {
@@ -1320,7 +1307,7 @@ let recognition = null;
         renderHistoryList();
     }
 
-    // Process markdown formatting and inject Code Copy + Run Sandbox buttons
+    // Process markdown formatting and inject safe Code Copy + Run Sandbox buttons
     function processAIMessageHTML(text) {
         let html = marked.parse(text);
 
@@ -1331,12 +1318,12 @@ let recognition = null;
             const encodedCode = encodeURIComponent(rawCode);
 
             const isJS = attrs.includes('lang-js') || attrs.includes('lang-javascript') || !attrs.includes('lang-');
-            const runButtonHTML = isJS ? `<button class="code-action-btn run" onclick="runCodeSnippet(decodeURIComponent('${encodedCode}'), this)">▶ Run</button>` : '';
+            const runButtonHTML = isJS ? `<button class="code-action-btn run" onclick="runCodeSnippet('${encodedCode}', this)">▶ Run</button>` : '';
 
             return `<div class="code-block-wrapper">
                 <div class="code-toolbar">
                     ${runButtonHTML}
-                    <button class="code-action-btn" onclick="copySnippet(decodeURIComponent('${encodedCode}'), this)">📋 Copy</button>
+                    <button class="code-action-btn" onclick="copySnippet('${encodedCode}', this)">📋 Copy</button>
                 </div>
                 <pre><code${attrs}>${codeContent}</code></pre>
             </div>`;
@@ -1345,7 +1332,8 @@ let recognition = null;
         return html;
     }
 
-    window.copySnippet = function(text, btn) {
+    window.copySnippet = function(encodedCode, btn) {
+        const text = decodeURIComponent(encodedCode);
         navigator.clipboard.writeText(text);
         const originalText = btn.textContent;
         btn.textContent = "✨ Copied!";
