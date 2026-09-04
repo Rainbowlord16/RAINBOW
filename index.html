@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rainbow AI</title>
+    <title>Rainbow AI Ecosystem 🌈</title>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -556,13 +556,6 @@
             transition: all 0.2s;
         }
         .tool-chip:hover { background: rgba(139, 92, 246, 0.2); color: var(--text-main); }
-        .tool-chip.recording { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); animation: pulse 1.5s infinite; }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
 
         .send-action-btn {
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
@@ -752,10 +745,10 @@
                         <button class="sidebar-toggle-btn" id="sidebarToggleBtn" onclick="toggleSidebar()" title="Toggle Sidebar">
                             <img src="RAINBOW_favicon.svg" alt="Toggle" style="width: 20px; height: 20px; display: block; border-radius: 4px;" />
                         </button>
-                        <h3 class="panel-title" id="activeChatTitle">Rainbow AI</h3>
+                        <h3 class="panel-title" id="activeChatTitle">Rainbow AI Local Node</h3>
                     </div>
                     <div class="header-badges">
-                        <div class="vram-monitor-badge" id="vramMonitor">⚡ WebGPU: 1.4 GB / (On your device terminal VRAM</div>
+                        <div class="vram-monitor-badge" id="vramMonitor">⚡ WebGPU: 1.4 GB / M2 Pro</div>
                         <div id="status" class="status-badge">Syncing Nodes...</div>
                     </div>
                 </div>
@@ -773,15 +766,13 @@
 
                     <div class="input-box-wrapper" id="dropZoneWrapper">
                         <div class="dropzone-overlay" id="dropzoneOverlay">📄 Drop .md, .txt or code file here to load!</div>
-                        <textarea id="userInput" class="input-textarea" placeholder="Ask Rainbow anything, or drag & drop markdown/code files here..." disabled></textarea>
+                        <textarea id="userInput" class="input-textarea" placeholder="Ask Rainbow AI anything, or drag & drop markdown/code files here..." disabled></textarea>
                         <div class="input-toolbar">
                             <div class="multimodal-tools">
                                 <label class="tool-chip" style="cursor: pointer;">
                                     📁 Import File
                                     <input type="file" id="fileImportInput" accept=".md,.txt,.js,.py,.html,.css,.json" style="display: none;" onchange="handleFileImport(this.files[0])">
                                 </label>
-                                <!-- Voice Input Button -->
-                                <button class="tool-chip" id="voiceBtn" onclick="toggleVoiceInput()">🎙️ Voice</button>
                             </div>
                             <button class="send-action-btn" id="sendBtn" onclick="handleSend()" disabled>Send</button>
                         </div>
@@ -993,72 +984,6 @@
         reader.readAsText(file);
     };
 
-    // Feature: Speech-to-Text Voice Input Handler
-    let recognition = null;
-    let isRecording = false;
-
-    window.toggleVoiceInput = function() {
-        const voiceBtn = document.getElementById('voiceBtn');
-        const input = document.getElementById('userInput');
-
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) {
-            alert("Speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge.");
-            return;
-        }
-
-        if (!recognition) {
-            try {
-                recognition = new SpeechRecognition();
-                recognition.continuous = false;
-                recognition.interimResults = true;
-                recognition.lang = 'en-US';
-
-                recognition.onstart = () => {
-                    isRecording = true;
-                    voiceBtn.classList.add('recording');
-                    voiceBtn.textContent = '🎙️ Listening...';
-                };
-
-                recognition.onresult = (event) => {
-                    let transcript = '';
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        transcript += event.results[i][0].transcript;
-                    }
-                    if (transcript) {
-                        input.value = transcript;
-                        input.focus();
-                    }
-                };
-
-                recognition.onerror = () => { stopVoice(); };
-                recognition.onend = () => { stopVoice(); };
-            } catch (err) {
-                console.error("Speech init error:", err);
-            }
-        }
-
-        if (isRecording) {
-            recognition.stop();
-        } else {
-            try {
-                recognition.start();
-            } catch (e) {
-                recognition = null;
-                toggleVoiceInput();
-            }
-        }
-    };
-
-    function stopVoice() {
-        isRecording = false;
-        const voiceBtn = document.getElementById('voiceBtn');
-        if (voiceBtn) {
-            voiceBtn.classList.remove('recording');
-            voiceBtn.textContent = '🎙️ Voice';
-        }
-    }
-
     // Feature: Fully Robust Code Sandbox Runner using ID lookups
     window.runCodeSnippet = function(codeId, btn) {
         const code = window.__codeStore[codeId];
@@ -1120,7 +1045,7 @@
     };
 </script>
 
-<!-- Web-LLM Gemma 2B Text Pipeline & Ecosystem Integrations -->
+<!-- Rainbow AI Local Engine & Ecosystem Integrations -->
 <script type="module">
     import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
 
@@ -1362,7 +1287,7 @@
             currentMessages.unshift(getSystemPrompt());
         }
 
-        activeChatTitle.textContent = session ? session.title : "Local Intelligence Node";
+        activeChatTitle.textContent = session ? session.title : "Rainbow AI Local Node";
 
         chatbox.innerHTML = "";
         const visibleMessages = currentMessages.filter(m => m.role !== "system");
@@ -1379,7 +1304,7 @@
     window.startNewChat = function() {
         currentSessionId = Date.now().toString();
         currentMessages = [getSystemPrompt()];
-        activeChatTitle.textContent = "Local Intelligence Node";
+        activeChatTitle.textContent = "Rainbow AI Local Node";
         chatbox.innerHTML = "";
         appendMessage("ai", "Hello! I am Rainbow 🌈, your personal AI assistant. How can I help you code, draw, or explore today?");
         renderHistoryList();
@@ -1534,14 +1459,14 @@
         chatbox.scrollTop = chatbox.scrollHeight;
     }
 
-    // === NOVA KIDS ASSISTANT GEMMA SHARING ===
+    // === NOVA KIDS ASSISTANT SHARING ===
     window.handleNovaSend = async function() {
         const input = document.getElementById('novaInput');
         const text = input.value.trim();
         if (!text) return;
 
         if (!engine) {
-            alert("Please wait for the main Gemma engine to finish syncing in the Chat tab first!");
+            alert("Please wait for the main engine to finish syncing in the Chat tab first!");
             return;
         }
 
