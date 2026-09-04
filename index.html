@@ -339,7 +339,6 @@
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
 
-        /* WebGPU Resource Monitor Pill */
         .vram-monitor-badge {
             font-size: 11px;
             font-weight: 400;
@@ -399,7 +398,6 @@
             backdrop-filter: blur(15px);
         }
         
-        /* Markdown Styling & Code Blocks */
         .ai .message-bubble p { margin-bottom: 10px; }
         .ai .message-bubble p:last-child { margin-bottom: 0; }
         
@@ -440,7 +438,6 @@
         .code-action-btn.run { background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4); color: #34d399; }
         .code-action-btn.run:hover { background: rgba(16, 185, 129, 0.4); color: white; }
 
-        /* Sandbox Output Console */
         .code-sandbox-output {
             background: #020617;
             border: 1px solid rgba(16, 185, 129, 0.3);
@@ -472,7 +469,6 @@
             box-sizing: border-box;
         }
 
-        /* Quick Prompt Chips */
         .quick-chips-container {
             display: flex;
             gap: 8px;
@@ -933,7 +929,10 @@
         input.focus();
     };
 
-    // Feature: Speech-to-Text Voice Input Handler (Fixed Transcript Binding)
+    // Global Code Store for Safe DOM-less Sandbox Execution
+    window.__codeStore = {};
+
+    // Feature: Speech-to-Text Voice Input Handler (Clean Transcript Binding)
     let recognition = null;
     let isRecording = false;
 
@@ -999,9 +998,11 @@
         }
     }
 
-    // Feature: Interactive Code Sandbox Playground Runner (Fixed Scope & Execution)
-    window.runCodeSnippet = function(encodedCode, btn) {
-        const code = decodeURIComponent(encodedCode);
+    // Feature: Fully Robust Code Sandbox Runner using ID lookups
+    window.runCodeSnippet = function(codeId, btn) {
+        const code = window.__codeStore[codeId];
+        if (!code) return;
+
         const wrapper = btn.closest('.code-block-wrapper');
         let outputBox = wrapper.querySelector('.code-sandbox-output');
         
@@ -1039,6 +1040,22 @@
         } finally {
             console.log = originalLog;
         }
+    };
+
+    window.copySnippet = function(codeId, btn) {
+        const code = window.__codeStore[codeId];
+        if (!code) return;
+
+        navigator.clipboard.writeText(code);
+        const originalText = btn.textContent;
+        btn.textContent = "✨ Copied!";
+        btn.style.background = "rgba(16, 185, 129, 0.2)";
+        btn.style.color = "#10b981";
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = "rgba(255, 255, 255, 0.1)";
+            btn.style.color = "#cbd5e1";
+        }, 2000);
     };
 </script>
 
@@ -1307,7 +1324,7 @@
         renderHistoryList();
     }
 
-    // Process markdown formatting and inject safe Code Copy + Run Sandbox buttons
+    // Process markdown formatting and store code safely in memory lookup map
     function processAIMessageHTML(text) {
         let html = marked.parse(text);
 
@@ -1315,15 +1332,17 @@
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = codeContent;
             const rawCode = tempDiv.textContent;
-            const encodedCode = encodeURIComponent(rawCode);
+            
+            const codeId = 'code_' + Math.random().toString(36).substring(2, 9);
+            window.__codeStore[codeId] = rawCode;
 
             const isJS = attrs.includes('lang-js') || attrs.includes('lang-javascript') || !attrs.includes('lang-');
-            const runButtonHTML = isJS ? `<button class="code-action-btn run" onclick="runCodeSnippet('${encodedCode}', this)">▶ Run</button>` : '';
+            const runButtonHTML = isJS ? `<button class="code-action-btn run" onclick="runCodeSnippet('${codeId}', this)">▶ Run</button>` : '';
 
             return `<div class="code-block-wrapper">
                 <div class="code-toolbar">
                     ${runButtonHTML}
-                    <button class="code-action-btn" onclick="copySnippet('${encodedCode}', this)">📋 Copy</button>
+                    <button class="code-action-btn" onclick="copySnippet('${codeId}', this)">📋 Copy</button>
                 </div>
                 <pre><code${attrs}>${codeContent}</code></pre>
             </div>`;
@@ -1331,20 +1350,6 @@
 
         return html;
     }
-
-    window.copySnippet = function(encodedCode, btn) {
-        const text = decodeURIComponent(encodedCode);
-        navigator.clipboard.writeText(text);
-        const originalText = btn.textContent;
-        btn.textContent = "✨ Copied!";
-        btn.style.background = "rgba(16, 185, 129, 0.2)";
-        btn.style.color = "#10b981";
-        setTimeout(() => {
-            btn.textContent = originalText;
-            btn.style.background = "rgba(255, 255, 255, 0.1)";
-            btn.style.color = "#cbd5e1";
-        }, 2000);
-    };
 
     function appendMessage(role, text, save = true) {
         const row = document.createElement("div");
