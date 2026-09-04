@@ -933,7 +933,7 @@
         input.focus();
     };
 
-    // Feature: Speech-to-Text Voice Input Handler
+// Feature: Speech-to-Text Voice Input Handler with Robust Permission & Event Handling
     let recognition = null;
     let isRecording = false;
 
@@ -943,43 +943,60 @@
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
-            alert("Speech recognition is not supported in this browser. Try using Google Chrome or Safari!");
+            alert("Speech recognition is not supported in this browser. Please use Google Chrome, Microsoft Edge, or Safari!");
             return;
         }
 
         if (!recognition) {
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = true;
-            recognition.lang = 'en-US';
+            try {
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
 
-            recognition.onstart = () => {
-                isRecording = true;
-                voiceBtn.classList.add('recording');
-                voiceBtn.textContent = '🎙️ Listening...';
-            };
+                recognition.onstart = () => {
+                    isRecording = true;
+                    voiceBtn.classList.add('recording');
+                    voiceBtn.textContent = '🎙️ Listening... Speak now';
+                };
 
-            recognition.onresult = (event) => {
-                let transcript = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    transcript += event.results[i][0].transcript;
-                }
-                input.value = transcript;
-            };
+                recognition.onresult = (event) => {
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        transcript += event.results[i][0].transcript;
+                    }
+                    input.value = transcript;
+                    input.focus();
+                };
 
-            recognition.onerror = () => {
-                stopVoice();
-            };
+                recognition.onerror = (event) => {
+                    console.error("Speech recognition error:", event.error);
+                    if (event.error === 'not-allowed') {
+                        alert("Microphone access was blocked. Please allow microphone permissions in your browser address bar settings!");
+                    }
+                    stopVoice();
+                };
 
-            recognition.onend = () => {
-                stopVoice();
-            };
+                recognition.onend = () => {
+                    stopVoice();
+                };
+            } catch (err) {
+                console.error("Failed to initialize speech recognition:", err);
+                alert("Could not start speech recognition.");
+                return;
+            }
         }
 
         if (isRecording) {
             recognition.stop();
         } else {
-            recognition.start();
+            try {
+                recognition.start();
+            } catch (e) {
+                // If it was already running or threw a state error, reset it
+                recognition = null;
+                toggleVoiceInput();
+            }
         }
     };
 
@@ -991,7 +1008,6 @@
             voiceBtn.textContent = '🎙️ Voice';
         }
     }
-
     // Feature: Interactive Code Sandbox Playground Runner
     window.runCodeSnippet = function(code, btn) {
         const wrapper = btn.closest('.code-block-wrapper');
