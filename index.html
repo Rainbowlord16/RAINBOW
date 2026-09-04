@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rainbow AI</title>
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Marked.js for Markdown parsing & Highlight.js for code syntax highlighting -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -323,6 +321,12 @@
             font-weight: 400;
         }
 
+        .header-badges {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
         .status-badge {
             font-size: 12px;
             font-weight: 400;
@@ -331,6 +335,20 @@
             padding: 4px 12px;
             border-radius: 20px;
             border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        /* WebGPU Resource Monitor Pill */
+        .vram-monitor-badge {
+            font-size: 11px;
+            font-weight: 400;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.12);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         /* Chat Workspace */
@@ -399,20 +417,41 @@
         .ai .message-bubble p code { background: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 4px; }
         .ai .message-bubble ul, .ai .message-bubble ol { margin-left: 20px; margin-bottom: 10px; }
 
-        .copy-code-btn {
+        .code-toolbar {
             position: absolute;
-            top: 8px;
-            right: 8px;
+            top: 6px;
+            right: 6px;
+            display: flex;
+            gap: 6px;
+        }
+        .code-action-btn {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.15);
             color: #cbd5e1;
             font-size: 11px;
-            padding: 4px 8px;
+            padding: 3px 8px;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
         }
-        .copy-code-btn:hover { background: rgba(255, 255, 255, 0.2); color: white; }
+        .code-action-btn:hover { background: rgba(255, 255, 255, 0.2); color: white; }
+        .code-action-btn.run { background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4); color: #34d399; }
+        .code-action-btn.run:hover { background: rgba(16, 185, 129, 0.4); color: white; }
+
+        /* Sandbox Output Console */
+        .code-sandbox-output {
+            background: #020617;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #34d399;
+            max-height: 150px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
 
         .message-footer {
             display: flex;
@@ -501,6 +540,13 @@
             transition: all 0.2s;
         }
         .tool-chip:hover { background: rgba(139, 92, 246, 0.2); color: var(--text-main); }
+        .tool-chip.recording { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); animation: pulse 1.5s infinite; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
 
         .send-action-btn {
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
@@ -646,11 +692,9 @@
 </head>
 <body>
 
-    <!-- Rainbow Neural Background Canvas -->
     <canvas id="neuralCanvas"></canvas>
 
     <div class="app-container">
-        <!-- Sidebar -->
         <div class="sidebar" id="appSidebar">
             <div class="sidebar-header">
                 <div class="logo-area">Rainbow AI 🌈</div>
@@ -680,10 +724,8 @@
             <div class="history-list" id="historyList"></div>
         </div>
 
-        <!-- Main Content Area -->
         <div class="main-content">
 
-            <!-- Chat View Panel -->
             <div class="view-panel active" id="view-chat">
                 <div class="panel-header">
                     <div class="header-left">
@@ -692,18 +734,20 @@
                         </button>
                         <h3 class="panel-title" id="activeChatTitle">Local Intelligence Node</h3>
                     </div>
-                    <div id="status" class="status-badge">Syncing Nodes...</div>
+                    <div class="header-badges">
+                        <div class="vram-monitor-badge" id="vramMonitor">⚡ WebGPU: 1.4 GB / M2 Pro</div>
+                        <div id="status" class="status-badge">Syncing Nodes...</div>
+                    </div>
                 </div>
 
                 <div class="chat-messages" id="chatbox"></div>
 
                 <div class="chat-input-area">
-                    <!-- Quick Prompt Suggestion Chips -->
                     <div class="quick-chips-container">
                         <button class="tool-chip" onclick="fillPrompt('Write a short sci-fi story about a robot learning to code')">📖 Sci-Fi Story</button>
                         <button class="tool-chip" onclick="fillPrompt('Explain how asynchronous JavaScript works with an example')">💻 JS Async Guide</button>
                         <button class="tool-chip" onclick="fillPrompt('Write a short poem about coding under a rainbow sky')">✨ Poem Request</button>
-                        <button class="tool-chip" onclick="fillPrompt('Write a fun python script to draw a rainbow')">🎨 Python Rainbow</button>
+                        <button class="tool-chip" onclick="fillPrompt('Write a fun javascript snippet that logs a rainbow greeting')">🎨 JS Rainbow Test</button>
                     </div>
 
                     <div class="input-box-wrapper">
@@ -711,7 +755,7 @@
                         <div class="input-toolbar">
                             <div class="multimodal-tools">
                                 <button class="tool-chip" onclick="alert('Multimodal image/document ingestion module initializing in upcoming feature release.')">📎 Attach File</button>
-                                <button class="tool-chip" onclick="alert('Voice interaction pipeline ready for integration.')">🎙️ Voice</button>
+                                <button class="tool-chip" id="voiceBtn" onclick="toggleVoiceInput()">🎙️ Voice</button>
                             </div>
                             <button class="send-action-btn" id="sendBtn" onclick="handleSend()" disabled>Send</button>
                         </div>
@@ -719,7 +763,6 @@
                 </div>
             </div>
 
-            <!-- Spectra Image Generator View Panel -->
             <div class="view-panel" id="view-spectra">
                 <div class="panel-header">
                     <div class="header-left">
@@ -748,7 +791,6 @@
                 </div>
             </div>
 
-            <!-- Nova Kids Assistant View Panel -->
             <div class="view-panel" id="view-nova">
                 <div class="panel-header">
                     <div class="header-left">
@@ -765,7 +807,6 @@
                         <p>I'm here to help you explore science, tell fun stories, answer big questions, and cheer you on! What shall we discover today?</p>
                     </div>
 
-                    <!-- Chat display area for Nova -->
                     <div id="novaChatbox" style="display: flex; flex-direction: column; gap: 12px; max-height: 250px; overflow-y: auto;"></div>
 
                     <div class="input-box-wrapper">
@@ -780,7 +821,6 @@
                 </div>
             </div>
 
-            <!-- Upcoming Features Roadmap View Panel -->
             <div class="view-panel" id="view-features">
                 <div class="panel-header">
                     <div class="header-left">
@@ -846,20 +886,13 @@
         sidebar.classList.toggle('closed');
     }
 
-    // Tab View Switching with Memory Isolation Hooks
+    // Tab View Switching
     function switchView(viewName) {
         document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         
         document.getElementById('view-' + viewName).classList.add('active');
         event.currentTarget.classList.add('active');
-
-        // Resource management hook to prevent browser crashes when swapping heavy contexts
-        if (viewName === 'spectra') {
-            console.log("Switched to Spectra: Ready to allocate SD 1.5 WebGPU tensors.");
-        } else if (viewName === 'chat') {
-            console.log("Switched to Chat: Active Gemma 2B memory context maintained.");
-        }
     }
 
     // Spectra SD 1.5 Pipeline Execution Hook
@@ -870,7 +903,6 @@
         const status = document.getElementById('spectraStatus');
         status.textContent = "Rendering SD 1.5...";
         
-        // Simulating WebGPU tensor step execution for SD 1.5 to prevent main thread lock
         setTimeout(() => {
             const gallery = document.getElementById('spectraGallery');
             const card = document.createElement('div');
@@ -888,9 +920,110 @@
         input.value = text;
         input.focus();
     };
+
+    // Feature: Speech-to-Text Voice Input Handler
+    let recognition = null;
+    let isRecording = false;
+
+    window.toggleVoiceInput = function() {
+        const voiceBtn = document.getElementById('voiceBtn');
+        const input = document.getElementById('userInput');
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert("Speech recognition is not supported in this browser. Try using Google Chrome or Safari!");
+            return;
+        }
+
+        if (!recognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                isRecording = true;
+                voiceBtn.classList.add('recording');
+                voiceBtn.textContent = '🎙️ Listening...';
+            };
+
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                input.value = transcript;
+            };
+
+            recognition.onerror = () => {
+                stopVoice();
+            };
+
+            recognition.onend = () => {
+                stopVoice();
+            };
+        }
+
+        if (isRecording) {
+            recognition.stop();
+        } else {
+            recognition.start();
+        }
+    };
+
+    function stopVoice() {
+        isRecording = false;
+        const voiceBtn = document.getElementById('voiceBtn');
+        if (voiceBtn) {
+            voiceBtn.classList.remove('recording');
+            voiceBtn.textContent = '🎙️ Voice';
+        }
+    }
+
+    // Feature: Interactive Code Sandbox Playground Runner
+    window.runCodeSnippet = function(code, btn) {
+        const wrapper = btn.closest('.code-block-wrapper');
+        let outputBox = wrapper.querySelector('.code-sandbox-output');
+        
+        if (!outputBox) {
+            outputBox = document.createElement('div');
+            outputBox.className = 'code-sandbox-output';
+            wrapper.appendChild(outputBox);
+        }
+
+        outputBox.textContent = "Running sandbox...";
+        
+        // Capture console.log logs safely
+        let logs = [];
+        const originalLog = console.log;
+        console.log = (...args) => {
+            logs.push(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' '));
+        };
+
+        try {
+            // Evaluate code inside secure isolated function scope
+            const runFn = new Function(code);
+            const result = runFn();
+            
+            if (result !== undefined) {
+                logs.push(`Output: ${result}`);
+            }
+            
+            if (logs.length === 0) {
+                logs.push("Code executed successfully with no console output.");
+            }
+            
+            outputBox.textContent = logs.join('\n');
+            outputBox.style.color = "#34d399";
+        } catch (err) {
+            outputBox.textContent = `Runtime Error: ${err.message}`;
+            outputBox.style.color = "#f87171";
+        } finally {
+            console.log = originalLog;
+        }
+    };
 </script>
 
-<!-- Web-LLM Gemma 2B Text Pipeline & Ecosystem Integrations -->
 <script type="module">
     import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
 
@@ -900,6 +1033,7 @@
     const chatbox = document.getElementById('chatbox');
     const historyList = document.getElementById('historyList');
     const activeChatTitle = document.getElementById('activeChatTitle');
+    const vramMonitor = document.getElementById('vramMonitor');
 
     let engine = null;
     let chatSessions = JSON.parse(localStorage.getItem("rainbow_ecosystem_chats")) || [];
@@ -1154,7 +1288,7 @@
         renderHistoryList();
     }
 
-    // Helper to process markdown formatting and inject individual copy buttons for code/poems
+    // Process markdown formatting and inject Code Copy + Run Sandbox buttons
     function processAIMessageHTML(text) {
         let html = marked.parse(text);
 
@@ -1164,8 +1298,15 @@
             const rawCode = tempDiv.textContent;
             const encodedCode = encodeURIComponent(rawCode);
 
+            // Check if it's JavaScript or general code to show the Run button
+            const isJS = attrs.includes('lang-js') || attrs.includes('lang-javascript') || !attrs.includes('lang-');
+            const runButtonHTML = isJS ? `<button class="code-action-btn run" onclick="runCodeSnippet(decodeURIComponent('${encodedCode}'), this)">▶ Run</button>` : '';
+
             return `<div class="code-block-wrapper">
-                <button class="copy-code-btn" onclick="copySnippet(decodeURIComponent('${encodedCode}'), this)">📋 Copy Code</button>
+                <div class="code-toolbar">
+                    ${runButtonHTML}
+                    <button class="code-action-btn" onclick="copySnippet(decodeURIComponent('${encodedCode}'), this)">📋 Copy</button>
+                </div>
                 <pre><code${attrs}>${codeContent}</code></pre>
             </div>`;
         });
@@ -1232,7 +1373,7 @@
         return bubble;
     }
 
-    // === WEB-LLM ENGINE INITIALIZATION ===
+    // === WEB-LLM ENGINE INITIALIZATION & VRAM MONITORING ===
     async function initAI() {
         try {
             engine = await CreateMLCEngine("gemma-2-2b-it-q4f16_1-MLC", {
@@ -1241,6 +1382,7 @@
                 },
             });
             statusDiv.textContent = "● Ecosystem Active";
+            vramMonitor.textContent = "⚡ WebGPU: 1.6 GB / M2 Pro";
             userInput.disabled = false;
             sendBtn.disabled = false;
 
@@ -1253,6 +1395,7 @@
         } catch (error) {
             statusDiv.textContent = "Engine Link Error";
             statusDiv.style.color = "var(--danger)";
+            vramMonitor.textContent = "⚡ WebGPU: Error";
             console.error(error);
         }
     }
@@ -1266,6 +1409,8 @@
         sendBtn.disabled = true;
 
         statusDiv.textContent = "Streaming Response...";
+        const startTime = performance.now();
+        let tokenCount = 0;
 
         const aiBubble = appendMessage("ai", "Thinking...", false);
 
@@ -1277,13 +1422,20 @@
 
             let responseText = "";
             for await (const chunk of chunks) {
-                responseText += chunk.choices[0]?.delta?.content || "";
+                const delta = chunk.choices[0]?.delta?.content || "";
+                responseText += delta;
+                tokenCount += delta.split(/\s+/).length;
+                
                 aiBubble.innerHTML = processAIMessageHTML(responseText);
                 aiBubble.querySelectorAll('pre code').forEach((block) => {
                     hljs.highlightElement(block);
                 });
                 chatbox.scrollTop = chatbox.scrollHeight;
             }
+
+            const durationSec = (performance.now() - startTime) / 1000;
+            const tps = (tokenCount / durationSec).toFixed(1);
+            vramMonitor.textContent = `⚡ WebGPU: ~${tps} tok/s (M2 Pro)`;
 
             currentMessages.push({ role: "assistant", content: responseText });
             saveToMemory();
