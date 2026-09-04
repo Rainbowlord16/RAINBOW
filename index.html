@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rainbow AI</title>
+    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     
+    <!-- Marked.js for Markdown parsing & Highlight.js for code syntax highlighting -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -554,6 +556,13 @@
             transition: all 0.2s;
         }
         .tool-chip:hover { background: rgba(139, 92, 246, 0.2); color: var(--text-main); }
+        .tool-chip.recording { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); animation: pulse 1.5s infinite; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
 
         .send-action-btn {
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
@@ -699,9 +708,11 @@
 </head>
 <body>
 
+    <!-- Rainbow Neural Background Canvas -->
     <canvas id="neuralCanvas"></canvas>
 
     <div class="app-container">
+        <!-- Sidebar -->
         <div class="sidebar" id="appSidebar">
             <div class="sidebar-header">
                 <div class="logo-area">Rainbow AI 🌈</div>
@@ -731,18 +742,20 @@
             <div class="history-list" id="historyList"></div>
         </div>
 
+        <!-- Main Content Area -->
         <div class="main-content">
 
+            <!-- Chat View Panel -->
             <div class="view-panel active" id="view-chat">
                 <div class="panel-header">
                     <div class="header-left">
                         <button class="sidebar-toggle-btn" id="sidebarToggleBtn" onclick="toggleSidebar()" title="Toggle Sidebar">
                             <img src="RAINBOW_favicon.svg" alt="Toggle" style="width: 20px; height: 20px; display: block; border-radius: 4px;" />
                         </button>
-                        <h3 class="panel-title" id="activeChatTitle">Local Gemma Node</h3>
+                        <h3 class="panel-title" id="activeChatTitle">Rainbow AI</h3>
                     </div>
                     <div class="header-badges">
-                        <div class="vram-monitor-badge" id="vramMonitor">⚡ WebGPU: 1.4 GB / M2 Pro</div>
+                        <div class="vram-monitor-badge" id="vramMonitor">⚡ WebGPU: 1.4 GB / (On your device terminal VRAM</div>
                         <div id="status" class="status-badge">Syncing Nodes...</div>
                     </div>
                 </div>
@@ -750,6 +763,7 @@
                 <div class="chat-messages" id="chatbox"></div>
 
                 <div class="chat-input-area">
+                    <!-- Quick Prompt Suggestion Chips -->
                     <div class="quick-chips-container">
                         <button class="tool-chip" onclick="fillPrompt('Write a short sci-fi story about a robot learning to code')">📖 Sci-Fi Story</button>
                         <button class="tool-chip" onclick="fillPrompt('Explain how asynchronous JavaScript works with an example')">💻 JS Async Guide</button>
@@ -766,6 +780,8 @@
                                     📁 Import File
                                     <input type="file" id="fileImportInput" accept=".md,.txt,.js,.py,.html,.css,.json" style="display: none;" onchange="handleFileImport(this.files[0])">
                                 </label>
+                                <!-- Voice Input Button -->
+                                <button class="tool-chip" id="voiceBtn" onclick="toggleVoiceInput()">🎙️ Voice</button>
                             </div>
                             <button class="send-action-btn" id="sendBtn" onclick="handleSend()" disabled>Send</button>
                         </div>
@@ -773,6 +789,7 @@
                 </div>
             </div>
 
+            <!-- Spectra Image Generator View Panel -->
             <div class="view-panel" id="view-spectra">
                 <div class="panel-header">
                     <div class="header-left">
@@ -801,6 +818,7 @@
                 </div>
             </div>
 
+            <!-- Nova Kids Assistant View Panel -->
             <div class="view-panel" id="view-nova">
                 <div class="panel-header">
                     <div class="header-left">
@@ -817,6 +835,7 @@
                         <p>I'm here to help you explore science, tell fun stories, answer big questions, and cheer you on! What shall we discover today?</p>
                     </div>
 
+                    <!-- Chat display area for Nova -->
                     <div id="novaChatbox" style="display: flex; flex-direction: column; gap: 12px; max-height: 250px; overflow-y: auto;"></div>
 
                     <div class="input-box-wrapper">
@@ -831,6 +850,7 @@
                 </div>
             </div>
 
+            <!-- Upcoming Features Roadmap View Panel -->
             <div class="view-panel" id="view-features">
                 <div class="panel-header">
                     <div class="header-left">
@@ -973,6 +993,72 @@
         reader.readAsText(file);
     };
 
+    // Feature: Speech-to-Text Voice Input Handler
+    let recognition = null;
+    let isRecording = false;
+
+    window.toggleVoiceInput = function() {
+        const voiceBtn = document.getElementById('voiceBtn');
+        const input = document.getElementById('userInput');
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert("Speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge.");
+            return;
+        }
+
+        if (!recognition) {
+            try {
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = () => {
+                    isRecording = true;
+                    voiceBtn.classList.add('recording');
+                    voiceBtn.textContent = '🎙️ Listening...';
+                };
+
+                recognition.onresult = (event) => {
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        transcript += event.results[i][0].transcript;
+                    }
+                    if (transcript) {
+                        input.value = transcript;
+                        input.focus();
+                    }
+                };
+
+                recognition.onerror = () => { stopVoice(); };
+                recognition.onend = () => { stopVoice(); };
+            } catch (err) {
+                console.error("Speech init error:", err);
+            }
+        }
+
+        if (isRecording) {
+            recognition.stop();
+        } else {
+            try {
+                recognition.start();
+            } catch (e) {
+                recognition = null;
+                toggleVoiceInput();
+            }
+        }
+    };
+
+    function stopVoice() {
+        isRecording = false;
+        const voiceBtn = document.getElementById('voiceBtn');
+        if (voiceBtn) {
+            voiceBtn.classList.remove('recording');
+            voiceBtn.textContent = '🎙️ Voice';
+        }
+    }
+
     // Feature: Fully Robust Code Sandbox Runner using ID lookups
     window.runCodeSnippet = function(codeId, btn) {
         const code = window.__codeStore[codeId];
@@ -1034,6 +1120,7 @@
     };
 </script>
 
+<!-- Web-LLM Gemma 2B Text Pipeline & Ecosystem Integrations -->
 <script type="module">
     import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
 
@@ -1275,7 +1362,7 @@
             currentMessages.unshift(getSystemPrompt());
         }
 
-        activeChatTitle.textContent = session ? session.title : "Local Gemma Node";
+        activeChatTitle.textContent = session ? session.title : "Local Intelligence Node";
 
         chatbox.innerHTML = "";
         const visibleMessages = currentMessages.filter(m => m.role !== "system");
@@ -1292,7 +1379,7 @@
     window.startNewChat = function() {
         currentSessionId = Date.now().toString();
         currentMessages = [getSystemPrompt()];
-        activeChatTitle.textContent = "Local Gemma Node";
+        activeChatTitle.textContent = "Local Intelligence Node";
         chatbox.innerHTML = "";
         appendMessage("ai", "Hello! I am Rainbow 🌈, your personal AI assistant. How can I help you code, draw, or explore today?");
         renderHistoryList();
