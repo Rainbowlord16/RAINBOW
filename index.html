@@ -766,13 +766,14 @@
 
                     <div class="input-box-wrapper" id="dropZoneWrapper">
                         <div class="dropzone-overlay" id="dropzoneOverlay">📄 Drop .md, .txt or code file here to load!</div>
-                        <textarea id="userInput" class="input-textarea" placeholder="Ask Rainbow AI anything, or drag & drop markdown/code files here..." disabled></textarea>
+                        <textarea id="userInput" class="input-textarea" placeholder="Ask Rainbow AI anything, or use voice input / drag & drop..." disabled></textarea>
                         <div class="input-toolbar">
                             <div class="multimodal-tools">
                                 <label class="tool-chip" style="cursor: pointer;">
                                     📁 Import File
                                     <input type="file" id="fileImportInput" accept=".md,.txt,.js,.py,.html,.css,.json" style="display: none;" onchange="handleFileImport(this.files[0])">
                                 </label>
+                                <button class="tool-chip" id="micBtn" onclick="toggleVoiceInput()" title="Speech to Text">🎙️ Voice Input</button>
                             </div>
                             <button class="send-action-btn" id="sendBtn" onclick="handleSend()" disabled>Send</button>
                         </div>
@@ -914,6 +915,67 @@
         
         document.getElementById('view-' + viewName).classList.add('active');
         event.currentTarget.classList.add('active');
+    }
+
+    // Voice Input Speech-to-Text Integration
+    let recognition = null;
+    let isRecording = false;
+
+    window.toggleVoiceInput = function() {
+        const micBtn = document.getElementById('micBtn');
+        const input = document.getElementById('userInput');
+
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert("Speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge!");
+            return;
+        }
+
+        if (isRecording) {
+            if (recognition) recognition.stop();
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+            isRecording = true;
+            micBtn.style.background = 'rgba(239, 68, 68, 0.3)';
+            micBtn.style.color = '#ef4444';
+            micBtn.textContent = '🛑 Listening...';
+        };
+
+        recognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                transcript += event.results[i][0].transcript;
+            }
+            input.value = transcript;
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech recognition error:", event.error);
+            stopMicState();
+        };
+
+        recognition.onend = () => {
+            stopMicState();
+        };
+
+        recognition.start();
+    }
+
+    function stopMicState() {
+        isRecording = false;
+        const micBtn = document.getElementById('micBtn');
+        if (micBtn) {
+            micBtn.style.background = '';
+            micBtn.style.color = '';
+            micBtn.textContent = '🎙️ Voice Input';
+        }
     }
 
     // Spectra SD 1.5 Pipeline Execution Hook
