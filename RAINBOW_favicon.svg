@@ -20,39 +20,43 @@
       <stop offset="100%" stop-color="#f59e0b" />
     </linearGradient>
 
-    <!-- Sleek Overlay Gradient for Gemini Vibe -->
-    <linearGradient id="geminiSheen" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.8" />
-      <stop offset="50%" stop-color="#a855f7" stop-opacity="0.6" />
-      <stop offset="100%" stop-color="#f43f5e" stop-opacity="0.9" />
+    <!-- Sleek Core Gradient -->
+    <linearGradient id="crownSheen" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="50%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#f43f5e" />
     </linearGradient>
   </defs>
 
-  <!-- Outer Neon Glow Layer (Scaled up and centered by adjusting path coordinates) -->
+  <!-- Centered, Symmetrical Neon Group -->
   <g filter="url(#neonGlow)">
-    <!-- Main Outer Arch (Expanded bounds for a bigger presence) -->
-    <path d="M 80 410 
-             C 80 140, 420 140, 420 410 
-             L 365 410 
-             C 365 190, 135 190, 135 410 Z" 
+    <!-- Outer Concentric Ring (Modern Arch / Ring Fusion) -->
+    <path d="M 90 380 
+             C 90 130, 410 130, 410 380 
+             L 360 380 
+             C 360 170, 140 170, 140 380 Z" 
           fill="url(#rainbowGrad)" 
           stroke="#ffffff" 
           stroke-width="4" 
-          stroke-opacity="0.4" />
+          stroke-opacity="0.5" />
 
-    <!-- Inner Cutout Arch -->
-    <path d="M 160 410 
-             C 160 250, 340 250, 340 410 
-             L 295 410 
-             C 295 280, 205 280, 205 410 Z" 
+    <!-- Inner Symmetrical Ring -->
+    <path d="M 170 380 
+             C 170 230, 330 230, 330 380 
+             L 285 380 
+             C 285 260, 215 260, 215 380 Z" 
           fill="#0b0f19" 
-          opacity="0.85" />
-          
-    <!-- Central Core Spark Line -->
-    <path d="M 185 410 C 185 305, 315 305, 315 410" 
+          opacity="0.9" />
+
+    <!-- Modern Crown Peaks Integrated at the Top Center -->
+    <path d="M 215 230 L 250 175 L 285 230 Z" 
           fill="none" 
-          stroke="url(#geminiSheen)" 
-          stroke-width="7" 
+          stroke="url(#crownSheen)" 
+          stroke-width="8" 
+          stroke-linejoin="round" 
           stroke-linecap="round" />
+
+    <!-- Central Floating Apex Crown Diamond/Node -->
+    <circle cx="250" cy="155" r="7" fill="#f59e0b" />
   </g>
 </svg>
