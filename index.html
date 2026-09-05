@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rainbow AI Ecosystem 🌈</title>
+    <title>Rainbow AI</title>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -887,7 +887,7 @@
         recognition.onresult = (event) => {
             let transcript = '';
             for (let i = event.resultIndex; i < event.results.length; ++i) {
-                transcript += event.results[0][0].transcript;
+                transcript += event.results[i][0].transcript;
             }
             input.value = transcript;
         };
